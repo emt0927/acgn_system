@@ -1,0 +1,16 @@
+# 依赖包
+node_modules/
+admin-web/node_modules/
+server/node_modules/
+
+# 环境变量与私密信息
+.env
+server/.env
+
+# 构建产物
+admin-web/dist/
+
+# 日志与系统文件
+*.log
+.DS_Store
+.vscode/
