@@ -9,8 +9,7 @@
 html,
 body,
 #app {
-    width: 100%;
-    height: 100%;
+
     overflow-x: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -22,4 +21,10 @@ body,
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+img {
+    display: block;
+    max-height: 100%;
+    height: auto;
 }
