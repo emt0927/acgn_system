@@ -5,9 +5,10 @@
         <div class="admin">
             <div class="admin_box">
                 <n-card class="admin_card">
-                    <n-tabs class="card-tabs" default-value="signin" size="large" animated
+                    <n-tabs class="card-tabs" v-model:value="defaultTabs" size="large" animated
                         pane-wrapper-style="margin: 0 -4px"
-                        pane-style="padding-left: 4px; padding-right: 4px; box-sizing: border-box;">
+                        pane-style="padding-left: 4px; padding-right: 4px; box-sizing: border-box;"
+                        @update:value="TabChange">
                         <n-tab-pane name="signin" tab="登录">
                             <n-form label-placement="left" label-width="auto" :model="loginForm" ref="loginRef"
                                 :rules="LoginRules">
@@ -56,7 +57,13 @@
 import type { FormInst, FormItemInst, FormItemRule, FormRules } from 'naive-ui';
 import { reactive, ref } from 'vue';
 import { useMessage } from 'naive-ui'
+import { loginApi, registerApi } from '@/api/admin';
+import { useUserStore } from '@/store';
+import { useRouter } from 'vue-router';
 const message = useMessage()
+
+// 默认展示的tabs 
+const defaultTabs = ref('signin')
 // 去空格
 const noSideSpace = (value: string) => {
     return !value.startsWith(' ') && !value.endsWith(' ')
@@ -89,7 +96,36 @@ const loginForm = reactive({
     username: '',
     password: ''
 })
+// 清空注册表单
+const resetRegisterForm = () => {
+    Object.assign(registerForm, {
+        username: '',
+        password: '',
+        repassword: ''
+    })
+    // 重置校验状态
+    registerRef.value?.restoreValidation
+}
+// 清空登录表单
+const resetLoginForm = () => {
+    Object.assign(loginForm, {
+        username: '',
+        password: ''
+    })
+    // 重置校验状态
+    loginRef.value?.restoreValidation()
+}
 
+// 切换时清空
+const TabChange = () => {
+    // 1. 重置注册表单
+    Object.assign(registerForm, { username: '', password: '', repassword: '' })
+    registerRef.value?.restoreValidation()
+
+    // 2. 重置登录表单
+    Object.assign(loginForm, { username: '', password: '' })
+    loginRef.value?.restoreValidation()
+}
 // 登录钩子
 const loginRef = ref<FormInst | null>(null)
 // 注册钩子
@@ -145,24 +181,38 @@ const RegisterRules: FormRules = {
 }
 
 // 提交事件
+const userStore = useUserStore()
+// 引入路由
+const router = useRouter()
 const Submit = (type: string) => {
+    // 登录
     if (type === 'login') {
-        loginRef.value?.validate((errors) => {
+        loginRef.value?.validate(async (errors) => {
             if (!errors) {
-                message.success('验证成功')
-                console.log(loginForm, 'loginForm 登录');
+                const res = await loginApi(loginForm)
+                message.success(`${res.message}`)
+                // 将token存入仓库持久化
+                userStore.setToken(res.data?.token ?? '')
+                // 清空输入框数据
+                resetLoginForm()
+                // 跳转首页
+                router.replace({ name: 'home' })
             } else {
                 console.log(errors)
                 message.error('验证失败')
             }
         })
 
-    }
+    } // 注册
     else {
-        registerRef.value?.validate((errors) => {
+        registerRef.value?.validate(async (errors) => {
             if (!errors) {
-                message.success('验证成功')
-                console.log(registerForm, 'registerForm 注册');
+                const res = await registerApi(registerForm)
+                message.success(`${res.message}`)
+                defaultTabs.value = 'signin'
+                // 清空输入框数据
+                resetRegisterForm()
+                console.log(defaultTabs.value);
             } else {
                 console.log(errors)
                 message.error('验证失败')
