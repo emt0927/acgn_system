@@ -19,7 +19,22 @@ const router = createRouter({
                 path: 'home',
                 name: 'home',
                 component: () => import('@/views/home/index.vue')
-            }]
+            }, {
+              path:'chart',
+              name:'chart',
+              component: () => import('@/views/chart/index.vue')
+            },
+            {
+                path:'setting',
+                name:'setting',
+                component: () => import('@/views/mySetting/index.vue')
+            },
+            {
+                path:'series',
+                name:'series',
+                component: () => import('@/views/series/index.vue')
+            }
+            ]
         }
     ]
 })
