@@ -1,7 +1,7 @@
 <template>
     <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="240" show-trigger>
         <div class="sider-content">
-            <n-menu :options="menuOptions" :collapsed-width="64"></n-menu>
+            <n-menu :options="menuOptions" :collapsed-width="64" default-value="go-back-home"></n-menu>
         </div>
     </n-layout-sider>
 </template>
