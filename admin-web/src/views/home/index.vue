@@ -18,15 +18,176 @@
                 <div class="sort_item">排序:最近更新</div>
             </div>
         </template>
-        111111我是首页
+        <div class="content-wrapper">
+            <div class="list">
+                <div class="item">
+                    <div class="head_title">
+                        <div class="title_subtype">TV动画</div>
+                        <div class="title_status">在追</div>
+                    </div>
+                    <img src="../../assets//ldws.jpg" alt="" class="poster">
+                    <div class="description">
+                        <div class="description_title">葬送的福利连</div>
+                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
+
+                        <div class="rate"> <n-rate readonly :size="14" />
+                            <div class="rate_text">10分</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="head_title">
+                        <div class="title_subtype">TV动画</div>
+                        <div class="title_status">在追</div>
+                    </div>
+                    <img src="../../assets//ldws.jpg" alt="" class="poster">
+                    <div class="description">
+                        <div class="description_title">葬送的福利连</div>
+                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
+
+                        <div class="rate"> <n-rate readonly :size="14" />
+                            <div class="rate_text">10分</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="head_title">
+                        <div class="title_subtype">TV动画</div>
+                        <div class="title_status">在追</div>
+                    </div>
+                    <img src="../../assets//ldws.jpg" alt="" class="poster">
+                    <div class="description">
+                        <div class="description_title">葬送的福利连</div>
+                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
+
+                        <div class="rate"> <n-rate readonly :size="14" />
+                            <div class="rate_text">10分</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="head_title">
+                        <div class="title_subtype">TV动画</div>
+                        <div class="title_status">在追</div>
+                    </div>
+                    <img src="../../assets//ldws.jpg" alt="" class="poster">
+                    <div class="description">
+                        <div class="description_title">葬送的福利连</div>
+                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
+
+                        <div class="rate"> <n-rate readonly :size="14" />
+                            <div class="rate_text">10分</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="head_title">
+                        <div class="title_subtype">TV动画</div>
+                        <div class="title_status">在追</div>
+                    </div>
+                    <img src="../../assets//ldws.jpg" alt="" class="poster">
+                    <div class="description">
+                        <div class="description_title">葬送的福利连</div>
+                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
+
+                        <div class="rate"> <n-rate readonly :size="14" />
+                            <div class="rate_text">10分</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="head_title">
+                        <div class="title_subtype">TV动画</div>
+                        <div class="title_status">在追</div>
+                    </div>
+                    <img src="../../assets//ldws.jpg" alt="" class="poster">
+                    <div class="description">
+                        <div class="description_title">葬送的福利连</div>
+                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
+
+                        <div class="rate"> <n-rate readonly :size="14" />
+                            <div class="rate_text">10分</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="head_title">
+                        <div class="title_subtype">TV动画</div>
+                        <div class="title_status">在追</div>
+                    </div>
+                    <img src="../../assets//ldws.jpg" alt="" class="poster">
+                    <div class="description">
+                        <div class="description_title">葬送的福利连</div>
+                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
+
+                        <div class="rate"> <n-rate readonly :size="14" />
+                            <div class="rate_text">10分</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="head_title">
+                        <div class="title_subtype">TV动画</div>
+                        <div class="title_status">在追</div>
+                    </div>
+                    <img src="../../assets//ldws.jpg" alt="" class="poster">
+                    <div class="description">
+                        <div class="description_title">葬送的福利连</div>
+                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
+
+                        <div class="rate"> <n-rate readonly :size="14" />
+                            <div class="rate_text">10分</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="head_title">
+                        <div class="title_subtype">TV动画</div>
+                        <div class="title_status">在追</div>
+                    </div>
+                    <img src="../../assets//ldws.jpg" alt="" class="poster">
+                    <div class="description">
+                        <div class="description_title">葬送的福利连</div>
+                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
+
+                        <div class="rate"> <n-rate readonly :size="14" />
+                            <div class="rate_text">10分</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="head_title">
+                        <div class="title_subtype">TV动画</div>
+                        <div class="title_status">在追</div>
+                    </div>
+                    <img src="../../assets//ldws.jpg" alt="" class="poster">
+                    <div class="description">
+                        <div class="description_title">葬送的福利连</div>
+                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
+
+                        <div class="rate"> <n-rate readonly :size="14" />
+                            <div class="rate_text">10分</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="10" :item-count="100" />
+            </div>
+        </div>
+
     </MyCard>
 </template>
 
 <script setup lang="ts">
 import MyCard from '@/components/MyCard.vue';
 import { computed, ref } from 'vue';
-
+// 引入mock数据
+import { mockAcgnList } from '@/mock/acgnData';
+console.log(mockAcgnList);
+const page = ref(1)
 // 默认选中tabs 
+// 进度
+const percentage = ref(2)
 const defaultTbs = ref('all')
 const tabs = [
     {
@@ -126,6 +287,73 @@ const currentStatusList = computed(() => {
             color: #4B9E5F;
         }
     }
+
+}
+
+
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+}
+
+.list {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    flex: 1;
+    align-content: start;
+    .item {
+        padding: 0 40px;
+        width: 100%;
+        position: relative;
+        border-radius: 8px;
+        background: #fff;
+        overflow: hidden;
+
+        .poster {
+            width: 100%;
+            height: 185px;
+            /* 黄金比例 */
+            object-fit: cover;
+            display: block;
+        }
+
+        .head_title {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            padding: 0 40px;
+            width: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .rate {
+            display: flex;
+            align-items: center;
+
+            .rate_text {
+                height: 20px;
+            }
+        }
+
+        .update_time {
+            display: flex;
+            justify-content: end;
+        }
+    }
+}
+
+.pagination-footer {
+    margin-top: auto;
+    /* 自动把分页推到最底部 */
+    padding: 10px 0;
+    display: flex;
+    justify-content: flex-end;
+    /* 右对齐 */
 
 }
 </style>

@@ -1,12 +1,18 @@
 <template>
-    <n-card class="card">
+    <n-card class="card" :content-style="{
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+    }">
         <div class="header">
             <slot name="cardTab"> #header-extra</slot>
         </div>
         <div class="action">
             <slot name="action">@action</slot>
         </div>
-        <slot>卡片内容</slot>
+        <div class="card-body">
+            <slot>卡片内容</slot>
+        </div>
     </n-card>
 </template>
 
@@ -22,6 +28,12 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+}
+
+/* 内容包裹层占满剩余高度 */
+.card-body {
+    flex: 1;
+        overflow: hidden;
 }
 
 .header {
