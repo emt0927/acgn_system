@@ -18,155 +18,25 @@
                 <div class="sort_item">排序:最近更新</div>
             </div>
         </template>
-        <div class="content-wrapper">
-            <div class="list">
-                <div class="item">
-                    <div class="head_title">
-                        <div class="title_subtype">TV动画</div>
-                        <div class="title_status">在追</div>
+        <div class="w-full h-full flex flex-col justify-between">
+            <div class="flex-1 grid grid-cols-5 grid-rows-2 gap-4 px-5 py-0 ">
+                <div v-for="item in 10"
+                    class="w-full relative rounded-lg bg-white shadow-[0 2px 8px rgba(0,0,0,0.04)] transition duration-200 ease-in-out hover:translate-y-[-3px] hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
+                    <div class="flex justify-between absolute w-full top-0 left-0 pointer-events-none">
+                        <div class="titleTag">
+                            TV动画111</div>
+                        <div
+                            class="titleTag">
+                            在追</div>
                     </div>
-                    <img src="../../assets//ldws.jpg" alt="" class="poster">
-                    <div class="description">
+                    <img src="../../assets//ldws.jpg" alt=""
+                        class="w-full h-[clamp(120px,18vh,240px)] block object-cover">
+                    <div class="text-[12px] p-1.5">
                         <div class="description_title">葬送的福利连</div>
                         <n-progress type="line" :percentage="percentage">28/28话</n-progress>
 
-                        <div class="rate"> <n-rate readonly :size="14" />
-                            <div class="rate_text">10分</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="head_title">
-                        <div class="title_subtype">TV动画</div>
-                        <div class="title_status">在追</div>
-                    </div>
-                    <img src="../../assets//ldws.jpg" alt="" class="poster">
-                    <div class="description">
-                        <div class="description_title">葬送的福利连</div>
-                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
-
-                        <div class="rate"> <n-rate readonly :size="14" />
-                            <div class="rate_text">10分</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="head_title">
-                        <div class="title_subtype">TV动画</div>
-                        <div class="title_status">在追</div>
-                    </div>
-                    <img src="../../assets//ldws.jpg" alt="" class="poster">
-                    <div class="description">
-                        <div class="description_title">葬送的福利连</div>
-                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
-
-                        <div class="rate"> <n-rate readonly :size="14" />
-                            <div class="rate_text">10分</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="head_title">
-                        <div class="title_subtype">TV动画</div>
-                        <div class="title_status">在追</div>
-                    </div>
-                    <img src="../../assets//ldws.jpg" alt="" class="poster">
-                    <div class="description">
-                        <div class="description_title">葬送的福利连</div>
-                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
-
-                        <div class="rate"> <n-rate readonly :size="14" />
-                            <div class="rate_text">10分</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="head_title">
-                        <div class="title_subtype">TV动画</div>
-                        <div class="title_status">在追</div>
-                    </div>
-                    <img src="../../assets//ldws.jpg" alt="" class="poster">
-                    <div class="description">
-                        <div class="description_title">葬送的福利连</div>
-                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
-
-                        <div class="rate"> <n-rate readonly :size="14" />
-                            <div class="rate_text">10分</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="head_title">
-                        <div class="title_subtype">TV动画</div>
-                        <div class="title_status">在追</div>
-                    </div>
-                    <img src="../../assets//ldws.jpg" alt="" class="poster">
-                    <div class="description">
-                        <div class="description_title">葬送的福利连</div>
-                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
-
-                        <div class="rate"> <n-rate readonly :size="14" />
-                            <div class="rate_text">10分</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="head_title">
-                        <div class="title_subtype">TV动画</div>
-                        <div class="title_status">在追</div>
-                    </div>
-                    <img src="../../assets//ldws.jpg" alt="" class="poster">
-                    <div class="description">
-                        <div class="description_title">葬送的福利连</div>
-                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
-
-                        <div class="rate"> <n-rate readonly :size="14" />
-                            <div class="rate_text">10分</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="head_title">
-                        <div class="title_subtype">TV动画</div>
-                        <div class="title_status">在追</div>
-                    </div>
-                    <img src="../../assets//ldws.jpg" alt="" class="poster">
-                    <div class="description">
-                        <div class="description_title">葬送的福利连</div>
-                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
-
-                        <div class="rate"> <n-rate readonly :size="14" />
-                            <div class="rate_text">10分</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="head_title">
-                        <div class="title_subtype">TV动画</div>
-                        <div class="title_status">在追</div>
-                    </div>
-                    <img src="../../assets//ldws.jpg" alt="" class="poster">
-                    <div class="description">
-                        <div class="description_title">葬送的福利连</div>
-                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
-
-                        <div class="rate"> <n-rate readonly :size="14" />
-                            <div class="rate_text">10分</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="head_title">
-                        <div class="title_subtype">TV动画</div>
-                        <div class="title_status">在追</div>
-                    </div>
-                    <img src="../../assets//ldws.jpg" alt="" class="poster">
-                    <div class="description">
-                        <div class="description_title">葬送的福利连</div>
-                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
-
-                        <div class="rate"> <n-rate readonly :size="14" />
-                            <div class="rate_text">10分</div>
+                        <div class="flex items-center"> <n-rate readonly :size="14" />
+                            <div class="pl-0.75 h-5 pt-0.5">10分</div>
                         </div>
                     </div>
                 </div>
@@ -257,6 +127,12 @@ const currentStatusList = computed(() => {
 </script>
 
 <style scoped>
+@reference "@/style.css";
+
+.titleTag {
+    @apply py-0.5 px-1.5 text-[11px] rounded bg-black/55 text-white backdrop-blur-[2px];
+}
+
 .tabs {
     display: flex;
 
@@ -300,50 +176,75 @@ const currentStatusList = computed(() => {
 }
 
 .list {
-    display: grid;
+
+    /* display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
     flex: 1;
     align-content: start;
+    gap: 50px; */
+    /* 让这 5 列在中间优雅居中 */
+    /* padding: 0 200px; */
     .item {
-        padding: 0 40px;
-        width: 100%;
+        /* width: 100%;
+        max-width: 220px;
         position: relative;
         border-radius: 8px;
         background: #fff;
         overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease; */
+
+        /* 鼠标悬浮微动效 */
+        &:hover {
+            /* transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08); */
+        }
 
         .poster {
-            width: 100%;
-            height: 185px;
-            /* 黄金比例 */
+            /* width: 100%;
+            height: clamp(120px, 18vh, 240px);
             object-fit: cover;
-            display: block;
+            display: block; */
         }
 
         .head_title {
-            display: flex;
+            /* display: flex;
             justify-content: space-between;
             position: absolute;
-            padding: 0 40px;
             width: 100%;
             top: 0;
             left: 0;
-        }
+            pointer-events: none; */
 
-        .rate {
-            display: flex;
-            align-items: center;
-
-            .rate_text {
-                height: 20px;
+            .title_subtype,
+            .title_status {
+                /* padding: 2px 6px;
+                font-size: 11px;
+                border-radius: 4px;
+                background: rgba(0, 0, 0, 0.55);
+                color: #fff;
+                backdrop-filter: blur(2px); */
+                /* 模糊磨砂效果 */
             }
         }
 
-        .update_time {
-            display: flex;
-            justify-content: end;
+        .description {
+            /* font-size: 12px;
+            padding: 6px; */
         }
+
+        .rate {
+            /* display: flex;
+            align-items: center; */
+
+            .rate_text {
+                /* padding-left: 3px;
+                height: 20px;
+                padding-top: 2px; */
+            }
+        }
+
     }
 }
 

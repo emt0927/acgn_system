@@ -4,9 +4,10 @@ import AutoImport from 'unplugin-auto-import/vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 import Components from 'unplugin-vue-components/vite'
 import path from 'path'
+import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), AutoImport({
+  plugins: [vue(), tailwindcss(), AutoImport({
     imports: ['vue', {
       'naive-ui': [
         'useDialog',
