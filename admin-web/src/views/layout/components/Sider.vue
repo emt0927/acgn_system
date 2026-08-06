@@ -1,22 +1,36 @@
 <template>
-    <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="240" show-trigger>
+    <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="240" show-trigger
+        :collapsed="collapsed" @collapse="collapsed = true" @expand="collapsed = false">
         <div class="sider-content">
-            <n-menu :options="menuOptions" :collapsed-width="64" default-value="go-back-home"></n-menu>
+            <n-menu :options="menuOptions" :collapsed-width="64" v-model:value="activeKey"></n-menu>
         </div>
     </n-layout-sider>
 </template>
 
 <script setup lang="ts">
 import { NIcon, type MenuOption } from 'naive-ui';
-import { h, type Component } from 'vue'
-import { RouterLink } from 'vue-router';
+import { h, ref, watch, watchEffect, type Component } from 'vue'
+import { RouterLink, useRoute } from 'vue-router';
 import { BarChart as BarChartIcon } from '@vicons/ionicons5'
 import { Book as BookIcon } from '@vicons/ionicons5'
 import { Settings as SettingsIcon } from '@vicons/ionicons5'
 import { Moon as MoonIcon } from '@vicons/ionicons5'
+import { useMediaQuery } from '@vueuse/core';
+// 屏幕宽度小于750时候 自动收起菜单 
+const collapsed = ref(false)
+const isMobile = useMediaQuery('(max-width: 749px)')
+watch(isMobile, (mobile) => {
+    collapsed.value = mobile
+}, { immediate: true })
+// 菜单选项与路由同步
+const activeKey = ref('')
 function renderIcon(icon: Component) {
     return () => h(NIcon, null, { default: () => h(icon) })
 }
+const route = useRoute()
+watchEffect(() => {
+    activeKey.value = route.name as string || 'home'
+})
 // 菜单数据
 const menuOptions: MenuOption[] = [
     {
@@ -29,7 +43,7 @@ const menuOptions: MenuOption[] = [
             },
             { default: () => '回家' }
         ),
-        key: 'go-back-home',
+        key: 'home',
         icon: renderIcon(BookIcon)
     },
     {
@@ -42,7 +56,7 @@ const menuOptions: MenuOption[] = [
             },
             { default: () => '看板' }
         ),
-        key: 'go-back-chart',
+        key: 'chart',
         icon: renderIcon(BarChartIcon)
     },
     {
@@ -55,7 +69,7 @@ const menuOptions: MenuOption[] = [
             },
             { default: () => '系列' }
         ),
-        key: 'go-back-series',
+        key: 'series',
         icon: renderIcon(MoonIcon)
 
     },
@@ -69,7 +83,7 @@ const menuOptions: MenuOption[] = [
             },
             { default: () => '设置' }
         ),
-        key: 'go-back-setting',
+        key: 'setting',
         icon: renderIcon(SettingsIcon)
 
     }
@@ -79,7 +93,7 @@ const menuOptions: MenuOption[] = [
 
 <style scoped lang="scss">
 :deep(.n-menu-item-content--selected *) {
-  color: #FFFFFF !important;
+    color: #FFFFFF !important;
 }
 
 .n-layout-sider {

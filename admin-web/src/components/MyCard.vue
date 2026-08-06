@@ -3,6 +3,7 @@
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
+        minHeight: 0,
     }">
         <div class="header">
             <slot name="cardTab"> #header-extra</slot>
@@ -33,7 +34,8 @@
 /* 内容包裹层占满剩余高度 */
 .card-body {
     flex: 1;
-        overflow: hidden;
+    overflow: hidden;
+  display: flex;
 }
 
 .header {

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vueuse/core": "^14.4.0",
     "axios": "^1.18.1",
     "pinia": "^4.0.2",
     "pinia-plugin-persistedstate": "^4.7.1",
@@ -16,12 +17,14 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.2",
     "@vicons/ionicons5": "^0.13.0",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/tsconfig": "^0.9.1",
     "naive-ui": "^2.44.1",
     "sass": "^1.101.6",
+    "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "unplugin-auto-import": "^21.0.0",
     "unplugin-vue-components": "^32.1.0",

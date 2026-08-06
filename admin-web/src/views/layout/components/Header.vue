@@ -53,7 +53,8 @@ const exit = () => {
     margin-right: 90px;
     display: flex;
     align-items: center;
-
+ flex-shrink: 0;
+ white-space: nowrap;
     .avatar {
         border-radius: 50%;
         width: 48px;

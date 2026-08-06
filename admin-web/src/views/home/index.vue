@@ -1,13 +1,13 @@
 <template>
     <MyCard>
         <template #cardTab>
-            <div class="tabs">
-                <div class="tabs_item" v-for="(item) in tabs" :key="item.type"
+            <div class="tabs overflow-x-auto whitespace-nowrap">
+                <div class="tabs_item px-5 cursor-pointer" v-for="(item) in tabs" :key="item.type"
                     :class="{ active: defaultTbs === item.type }" @click="setTabs(item.type)">{{ item.name }}</div>
             </div>
         </template>
         <template #action>
-            <div class="status">
+            <div class="status overflow-x-auto whitespace-nowrap">
                 <div class="status_left">
                     <template v-for="(item, index) in currentStatusList" :key="item.key">
                         <div class="status_item" :class="{ active: currentStatus === item.key }"
@@ -18,30 +18,30 @@
                 <div class="sort_item">排序:最近更新</div>
             </div>
         </template>
-        <div class="w-full h-full flex flex-col justify-between">
-            <div class="flex-1 grid grid-cols-5 grid-rows-2 gap-4 px-5 py-0 ">
-                <div v-for="item in 10"
-                    class="w-full relative rounded-lg bg-white shadow-[0 2px 8px rgba(0,0,0,0.04)] transition duration-200 ease-in-out hover:translate-y-[-3px] hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
+        <div class="flex flex-col justify-between w-full">
+            <div
+                class="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
+                <div v-for="item in 12"
+                    class="flex flex-col justify-center  w-full relative rounded-lg bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition duration-200 ease-in-out hover:translate-y-[-3px] hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
                     <div class="flex justify-between absolute w-full top-0 left-0 pointer-events-none">
                         <div class="titleTag">
-                            TV动画111</div>
-                        <div
-                            class="titleTag">
+                            TV动画</div>
+                        <div class="titleTag">
                             在追</div>
                     </div>
-                    <img src="../../assets//ldws.jpg" alt=""
-                        class="w-full h-[clamp(120px,18vh,240px)] block object-cover">
+                    <img src="../../assets/ldws.jpg" alt="" class="w-full aspect-3/4 block object-cover">
                     <div class="text-[12px] p-1.5">
-                        <div class="description_title">葬送的福利连</div>
+                        <div class="description_title truncate">葬送的福利连</div>
                         <n-progress type="line" :percentage="percentage">28/28话</n-progress>
 
-                        <div class="flex items-center"> <n-rate readonly :size="14" />
-                            <div class="pl-0.75 h-5 pt-0.5">10分</div>
+                        <div class="flex items-center"> <n-rate readonly :size="12" :default-value="5"
+                                class="max-w-full" />
+                            <div class="pl-0.75 h-5 pt-0.5 shrink-0 whitespace-nowrap">10分</div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="10" :item-count="100" />
+            <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="12" :item-count="100" />
             </div>
         </div>
 
@@ -54,7 +54,7 @@ import { computed, ref } from 'vue';
 // 引入mock数据
 import { mockAcgnList } from '@/mock/acgnData';
 console.log(mockAcgnList);
-const page = ref(1)
+const page = ref(3)
 // 默认选中tabs 
 // 进度
 const percentage = ref(2)
@@ -130,16 +130,11 @@ const currentStatusList = computed(() => {
 @reference "@/style.css";
 
 .titleTag {
-    @apply py-0.5 px-1.5 text-[11px] rounded bg-black/55 text-white backdrop-blur-[2px];
+    @apply py-0.5 px-1.5 text-[11px] rounded bg-black/55 text-white backdrop-blur-[2px] truncate; 
 }
 
 .tabs {
     display: flex;
-
-    .tabs_item {
-        padding: 0 20px;
-        cursor: pointer;
-    }
 
     .tabs_item.active {
         color: #4B9E5F;
@@ -175,82 +170,7 @@ const currentStatusList = computed(() => {
     width: 100%;
 }
 
-.list {
-
-    /* display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    flex: 1;
-    align-content: start;
-    gap: 50px; */
-    /* 让这 5 列在中间优雅居中 */
-    /* padding: 0 200px; */
-    .item {
-        /* width: 100%;
-        max-width: 220px;
-        position: relative;
-        border-radius: 8px;
-        background: #fff;
-        overflow: hidden;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        transition: transform 0.2s ease, box-shadow 0.2s ease; */
-
-        /* 鼠标悬浮微动效 */
-        &:hover {
-            /* transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08); */
-        }
-
-        .poster {
-            /* width: 100%;
-            height: clamp(120px, 18vh, 240px);
-            object-fit: cover;
-            display: block; */
-        }
-
-        .head_title {
-            /* display: flex;
-            justify-content: space-between;
-            position: absolute;
-            width: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none; */
-
-            .title_subtype,
-            .title_status {
-                /* padding: 2px 6px;
-                font-size: 11px;
-                border-radius: 4px;
-                background: rgba(0, 0, 0, 0.55);
-                color: #fff;
-                backdrop-filter: blur(2px); */
-                /* 模糊磨砂效果 */
-            }
-        }
-
-        .description {
-            /* font-size: 12px;
-            padding: 6px; */
-        }
-
-        .rate {
-            /* display: flex;
-            align-items: center; */
-
-            .rate_text {
-                /* padding-left: 3px;
-                height: 20px;
-                padding-top: 2px; */
-            }
-        }
-
-    }
-}
-
 .pagination-footer {
-    margin-top: auto;
-    /* 自动把分页推到最底部 */
     padding: 10px 0;
     display: flex;
     justify-content: flex-end;

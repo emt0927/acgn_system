@@ -1,6 +1,6 @@
 <template>
     <MyCard>
-        我的setting
+        setting
     </MyCard>
 </template>
 
@@ -10,4 +10,5 @@ import MyCard from '@/components/MyCard.vue';
 
 </script>
 
-<style scoped></style>
+<style scoped>
+</style>
