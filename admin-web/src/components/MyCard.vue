@@ -8,7 +8,7 @@
         <div class="header">
             <slot name="cardTab"> #header-extra</slot>
         </div>
-        <div class="action">
+        <div class="action bg-action">
             <slot name="action">@action</slot>
         </div>
         <div class="card-body">
@@ -45,7 +45,7 @@
 
 .action {
     padding: 20px 24px;
-    background-color: #fafafc;
+  
     // margin: 0 -24px 16px -24px;
     margin: 0 -24px;
 }

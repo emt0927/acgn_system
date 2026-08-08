@@ -1,5 +1,5 @@
 <template>
-    <n-layout position="absolute" class="layout-container">
+    <n-layout position="absolute" class="layout-container ">
         <!-- 1. 顶部-->
         <Header></Header>
         <!-- 2. 中间区域-->
@@ -7,7 +7,7 @@
             <!-- 左侧边栏 -->
             <Sider></Sider>
             <!-- 右侧内容区 -->
-            <n-layout-content content-style="padding: 24px; min-height: 100%; box-sizing: border-box; background-color:#f5f5f5">
+            <n-layout-content content-style="padding: 24px; min-height: 100%; box-sizing: border-box; background-color:var(--content-bg)">
                 <!-- 中间用一个卡片承载内容 -->
                 <router-view></router-view>
                  <!-- <Footer></Footer> -->

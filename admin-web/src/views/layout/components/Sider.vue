@@ -1,5 +1,5 @@
 <template>
-    <n-layout-sider bordered collapse-mode="width" :collapsed-width="64" :width="240" show-trigger
+    <n-layout-sider bordered collapse-mode="width" class="bg-sider!"  :collapsed-width="64" :width="240" show-trigger
         :collapsed="collapsed" @collapse="collapsed = true" @expand="collapsed = false">
         <div class="sider-content">
             <n-menu :options="menuOptions" :collapsed-width="64" v-model:value="activeKey"></n-menu>
@@ -97,7 +97,7 @@ const menuOptions: MenuOption[] = [
 }
 
 .n-layout-sider {
-    background-color: #3B7549;
+    background-color: var(--sider-bg);
     padding-top: 24px;
     color: #fff;
 }

@@ -1,6 +1,6 @@
 <template>
     <MyCard>
-        setting
+      setting
     </MyCard>
 </template>
 
