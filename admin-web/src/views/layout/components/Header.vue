@@ -12,7 +12,7 @@
             </div>
         </div>
         <div class="head-right">
-            <div @click="userStore.toggleDark" class="flex justify-center items-center">
+            <div @click="userStore.toggleDark" class="flex justify-center items-center cursor-pointer">
                 <n-icon size="24" color="text-sider">
                     <MoonIcon  v-if="userStore.isDark"/>
                     <SunnyIcon v-else/>

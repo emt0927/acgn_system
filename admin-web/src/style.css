@@ -6,6 +6,7 @@
 *::after {
     box-sizing: border-box;
 }
+
 html,
 body,
 #app {
@@ -33,31 +34,42 @@ body,
 
 /* 默认：白天模式 */
 :root {
-    --sider-bg: #3B7549;
-    /* 侧边栏背景 */
-    --action-bg: #fafafc;
-    /* 操作区背景 */
-    --content-bg: #f5f5f5;
-    /* 文字颜色 */
-    --item-bg: #ffffff;
-    /* 卡片颜色 */
-
+    --sider: #3B7549;
+    /* 侧边栏 */
+    --action: #fafafc;
+    /* 操作区 */
+    --content: #f5f5f5;
+    /* 文字 */
+    --item: #ffffff;
+    /* 卡片 */
+    --muted: #e8efea
+        /* 弱化 */
 }
 
 /* 切换到黑夜模式（当 html 标签带 .dark 类名时生效） */
 .dark {
-    --sider-bg: #18181C;
-    /* 暗色下的侧边栏（可以调暗一点的绿色，或直接用 #18181c） */
-    --action-bg: #242428;
-    /* 暗色下的操作区背景 */
-    --content-bg: #101014;
-    /* 暗色下的主内容区背景 */
-    --item-bg: #1c1a18;
+    --sider: #18181C;
+    /* 暗色下的侧边栏 */
+    --action: #242428;
+    /* 暗色下的操作区 */
+    --content: #101014;
+    /* 暗色下的主内容区 */
+    --item: #1c1a18;
+    /* 暗色下的卡片 */
+
 }
+
 /* 侧边栏 卡片颜色 action 为 dark控制 非naive ui 控制 */
 @theme {
-    --color-sider: var(--sider-bg);
-    --color-action: var(--action-bg);
-    --color-content: var(--content-bg);
-    --color-item: var(--item-bg);
+    --color-sider: var(--sider);
+    --color-action: var(--action);
+    --color-content: var(--content);
+    --color-item: var(--item);
+    --color-muted:var(--muted)
 }
+
+/*  切换主题 
+先在公共的style文件中用类名定义好不同主题的颜色
+用状态切换控制类名 通过类名动态的显示不同颜色 
+naive ui也是通过状态切换去显示它的内置主题
+*/

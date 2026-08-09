@@ -1,6 +1,6 @@
 <template>
     <MyCard>
-      setting
+      <div class=""></div>
     </MyCard>
 </template>
 
