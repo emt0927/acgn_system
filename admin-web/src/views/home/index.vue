@@ -15,43 +15,28 @@
                         <n-divider v-if="index < currentStatusList.length - 1" vertical />
                     </template>
                 </div>
-                <div class="sort_item">排序:最近更新</div> 
-                <div @click="isLoaded = !isLoaded">点击</div>
+                <div class="sort_item">
+                    <n-dropdown trigger="hover" :options="options" @select="handleSelect" placement="bottom-start">
+                        <span class="cursor-pointer h-full block flex items-center">排序:最近更新</span>
+                    </n-dropdown>
+                </div>
+                <div class="edit"> <n-button type="tertiary">
+                        点击录入
+                    </n-button></div>
             </div>
         </template>
         <div class="flex flex-col justify-between w-full pt-5">
             <div
-                class="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
-                <div v-for="item in 12"
-                    class=" group flex flex-col w-full relative rounded-lg bg-item  shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition duration-200 ease-in-out hover:-translate-y-0.5  hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
-                    <div class="flex justify-between absolute w-full top-0 left-0 pointer-events-none z-10">
-                        <div class="titleTag">
-                            TV动画</div>
-                        <div class="titleTag">
-                            在追</div>
-                    </div>
-                    <div class="overflow-hidden rounded-t-lg aspect-3/4 bg-muted">
-                        <span class="transition-opacity w-full h-full block ease-out duration-150"
-                            :class="isLoaded ? 'opacity-100' : 'opacity-0'">
-                            <img src="../../assets/ldws.jpg" alt=""
-                                class="w-full h-full  block object-cover transition duration-300 ease-in-out group-hover:scale-[1.04]">
-                        </span>
-                    </div>
-                    <div class="text-[12px] p-1.5">
-                        <div class="description_title truncate">葬送的福利连</div>
-                        <n-progress type="line" :percentage="percentage">28/28话</n-progress>
-
-                        <div class="flex items-center"> <n-rate readonly :size="12" :default-value="5"
-                                class="max-w-full" />
-                            <div class="pl-0.75 h-5 pt-0.5 shrink-0 whitespace-nowrap">10分</div>
-                        </div>
-                    </div>
-                </div>
+                class="flex-1 content-start grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
+                <ContentCard v-for="item in MockMedia" :key="item.id" :item="item"></ContentCard>
             </div>
             <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="12" :item-count="100" />
             </div>
+            <!-- 抽屉组件 -->
+             <MyDrawer></MyDrawer>
+             <!-- 详情展示框 -->
+              <MyModal></MyModal>
         </div>
-
     </MyCard>
 </template>
 
@@ -59,16 +44,37 @@
 import MyCard from '@/components/MyCard.vue';
 import { computed, ref } from 'vue';
 // 引入mock数据
-import { mockAcgnList } from '@/mock/acgnData';
-console.log(mockAcgnList);
+import { MockMedia } from '@/mock/acgnData';
+import ContentCard from './components/ContentCard.vue';
+import MyDrawer from './components/MyDrawer.vue';
+import MyModal from './components/MyModal.vue';
+console.log(MockMedia);
+// 抽屉开关
+// 排序选择
+const options = [
+    {
+        label: '滨海湾金沙，新加坡',
+        key: 'marina bay sands',
+        disabled: true
+    },
+    {
+        label: '布朗酒店，伦敦',
+        key: 'brown\'s hotel, london'
+    }
+]
+
+// 选择时触发
+const handleSelect = (key: string | number) => {
+    console.log('key');
+}
+
 // 分页
 const page = ref(3)
 // 图片懒加载
 const isLoaded = ref(true)
 
 // 默认选中tabs 
-// 进度
-const percentage = ref(2)
+
 const defaultTbs = ref('all')
 const tabs = [
     {
@@ -138,12 +144,6 @@ const currentStatusList = computed(() => {
 </script>
 
 <style scoped>
-@reference "@/style.css";
-
-.titleTag {
-    @apply py-0.5 px-1.5 text-[11px] rounded bg-black/55 text-white backdrop-blur-[2px] truncate;
-}
-
 .tabs {
     display: flex;
 
@@ -163,6 +163,8 @@ const currentStatusList = computed(() => {
         .status_item {
             font-size: 14px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
         }
 
         .status_item.active {
@@ -170,6 +172,11 @@ const currentStatusList = computed(() => {
         }
     }
 
+    .edit {
+        display: flex;
+        flex: 1;
+        justify-content: end;
+    }
 }
 
 

@@ -1,6 +1,45 @@
-import type { AcgnItem } from "@/types/acgn";
+import type { MediaCardDetail, MediaCardItem } from "@/types/acgn";
 
-export const mockAcgnList: AcgnItem[] = [
+// 作品
+export const MockMedia: MediaCardItem[] = [
+    {
+        "id": 101,
+        "title": "葬送的芙莉莲",
+        "cover": "/assets/fll.jpg",
+        "type": "anime",
+        "subTypeLabel": "TV动画",
+        "status": "doing",
+        "statusLabel": "在追",
+        "rating": 10,
+        "progress": { "current": 14, "total": 28, "unit": "话" }
+    },
+    {
+        "id": 102,
+        "title": "艾尔登法环",
+        "cover": "/assets/elden_ring.jpg",
+        "type": "game",
+        "subTypeLabel": "ARPG",
+        "status": "doing",
+        "statusLabel": "在玩",
+        "rating": 9.8,
+        "progress": { "current": 85, "total": 100, "unit": "小时", "text": "主线通关/85h" }
+    },
+    {
+        "id": 103,
+        "title": "黑神话：悟空",
+        "cover": "/assets/wukong.jpg",
+        "type": "game",
+        "subTypeLabel": "ACT",
+        "status": "done",
+        "statusLabel": "已通关",
+        "rating": 9.5,
+        "progress": { "current": 100, "text": "全成就白金" }
+    }
+]
+
+
+// 详情
+export const mockAcgnList: MediaCardDetail[] = [
     {
         id: '1',
         title: '葬送的芙莉莲',

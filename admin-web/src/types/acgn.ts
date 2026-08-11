@@ -15,7 +15,59 @@ export type AcgnType = 'anime' | 'manga' | 'game' | 'novel'
  */
 export type AcgnStatus = 'wish' | 'doing' | 'done' | 'dropped'
 
-export interface AcgnItem {
+/**
+ 标签
+ */
+export type SubType = 'TV动画' | '剧场版' | '连载漫画' | 'RPG' | 'ACT' | string;
+
+
+
+/*
+作品
+*/
+export interface MediaCardItem {
+    /**id */
+    id: string | number;
+    /**作品标题 */
+    title: string;
+    /**图片地址 */
+    cover: string;
+    /**作品类型 */
+    type: AcgnType;        // 'anime' | 'comic' | 'game' | 'novel'
+    /**左侧状态标签 */
+    subTypeLabel: string;   // 角标左侧，如: "TV动画", "RPG", "单机"
+    /**状态 */
+    status: AcgnStatus;     // 状态
+    /**右侧状态标签 */
+    statusLabel: string;    // 角标右侧，如: "在追", "在玩", "已通关"
+    /**评分 */
+    rating: number;         // 评分，如 10
+    /**进度 */
+
+    // 🌟 通用进度数据模型
+    progress: {
+        /**
+         * 当前进度值（28集 / 45小时 / 85%）
+         */
+        current: number;
+        /**
+      * 总量（28集 / 100小时 / 100% 可选
+      */
+        total?: number;  
+        /**
+         *  单位（"话", "卷", "小时", "%"）
+         */   
+        unit?: string;       
+        /**
+         *  【核心】自定义显示文本。如果存在，直接优先显示此字段！
+         */
+        text?: string;        
+    };
+}
+/*
+作品详情
+*/
+export interface MediaCardDetail {
     /** 记录唯一ID */
     id: string
 

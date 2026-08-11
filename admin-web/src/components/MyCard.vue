@@ -39,7 +39,7 @@
 }
 
 .header {
-    padding: 20px 24px;
+    padding: 15px 24px;
     margin: -20px -24px 0 -24px;
 }
 
