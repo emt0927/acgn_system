@@ -17,25 +17,27 @@
                 </div>
                 <div class="sort_item">
                     <n-dropdown trigger="hover" :options="options" @select="handleSelect" placement="bottom-start">
-                        <span class="cursor-pointer h-full block flex items-center">排序:最近更新</span>
+                        <span class="cursor-pointer h-full  flex items-center">排序:最近更新</span>
                     </n-dropdown>
                 </div>
-                <div class="edit"> <n-button type="tertiary">
+                <div class="edit"> <n-button type="tertiary" @click="showDrawer">
                         点击录入
                     </n-button></div>
             </div>
         </template>
         <div class="flex flex-col justify-between w-full pt-5">
             <div
-                class="flex-1 content-start grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
-                <ContentCard v-for="item in MockMedia" :key="item.id" :item="item"></ContentCard>
+                class="flex-1 content-start grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
+                <ContentCard v-for="item in MockMedia" :key="item.id" :item="item" @click="handleOpenDetail">
+                </ContentCard>
             </div>
             <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="12" :item-count="100" />
             </div>
             <!-- 抽屉组件 -->
-             <MyDrawer></MyDrawer>
-             <!-- 详情展示框 -->
-              <MyModal></MyModal>
+            <MyDrawer v-model:active="drawerState" :detail="drawerDetail"></MyDrawer>
+            <!-- 详情展示框 -->
+            <MyModal v-model:show="showDetail" :item="selectedItem" @open-edit="handleOpenEditFromDetail"
+                @del-show="DelItem" />
         </div>
     </MyCard>
 </template>
@@ -44,12 +46,48 @@
 import MyCard from '@/components/MyCard.vue';
 import { computed, ref } from 'vue';
 // 引入mock数据
-import { MockMedia } from '@/mock/acgnData';
+import { mockAcgnList, MockMedia } from '@/mock/acgnData';
 import ContentCard from './components/ContentCard.vue';
 import MyDrawer from './components/MyDrawer.vue';
 import MyModal from './components/MyModal.vue';
+import type { MediaCardDetail } from '@/types/acgn.ts';
+
+// 拿到详情数据
+// 传递给详情页的数据
+const selectedItem = ref<MediaCardDetail | null>(null)
+
+// 作品详情的开关 
+const showDetail = ref(false)
+const handleOpenDetail = (id: number) => {
+    showDetail.value = true
+    selectedItem.value = mockAcgnList.find(item => item.id === id) || null
+    console.log(selectedItem.value, 'item');
+}
 console.log(MockMedia);
-// 抽屉开关
+
+// 抽屉状态
+const drawerState = ref(false)
+// 抽屉数据
+const drawerDetail = ref<MediaCardDetail | null>(null)
+// 新增作品
+const showDrawer = () => {
+    console.log('我是录入');
+    drawerDetail.value = null
+    drawerState.value = true
+
+}
+// 详情弹出中的编辑传回来的数据
+const handleOpenEditFromDetail = () => {
+    // 抽屉数据
+    drawerDetail.value = selectedItem.value
+    console.log(drawerDetail.value, '编辑');
+    drawerState.value = true
+}
+// 删除作品
+const DelItem = () => {
+    console.log(selectedItem.value?.id, '我是删除');
+}
+
 // 排序选择
 const options = [
     {
@@ -109,26 +147,26 @@ const statusTextMap: Record<string, Record<string, string>> = {
     // 游戏专属文案
     game: {
         all: '全部',
+        wish: '准备玩',
         doing: '正在玩',
-        wish: '想玩',
         done: '已通关',
-        dropped: '退坑'
+        dropped: '已退坑'
     },
     // 全部 (通用融合文案)
     all: {
         all: '全部',
+        wish: '准备追/玩',
         doing: '正在追/玩',
-        wish: '想看/想玩',
-        done: '已完/通关',
-        dropped: '弃坑/退坑'
+        done: '已追完/通关',
+        dropped: '已弃坑/退坑'
     },
     // 默认 (动画/漫画/小说通用)
     default: {
         all: '全部',
+        wish: '准备追',
         doing: '正在追',
-        wish: '想看',
-        done: '看过',
-        dropped: '弃坑'
+        done: '已追完',
+        dropped: '已弃坑'
     }
 }
 const currentStatusList = computed(() => {

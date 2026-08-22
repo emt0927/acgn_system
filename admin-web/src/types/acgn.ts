@@ -8,13 +8,12 @@ export type AcgnType = 'anime' | 'manga' | 'game' | 'novel'
 
 /**
  * 追追状态
- * wish 想看
- * doing 在看(追更)
- * done 看过(通过)
- * dropped 弃坑
+ * wish 想看(想玩)
+ * doing 追更(在玩)
+ * done 看过(通关)
+ * dropped 弃坑(退坑)
  */
 export type AcgnStatus = 'wish' | 'doing' | 'done' | 'dropped'
-
 /**
  标签
  */
@@ -25,9 +24,24 @@ export type SubType = 'TV动画' | '剧场版' | '连载漫画' | 'RPG' | 'ACT' 
 /*
 作品
 */
+// 统一进度
+export interface ProgressInfo {
+    /**
+           * 当前进度值（28集 / 45小时 / 85%）
+           */
+    current?: number;
+    /**
+  * 总量（28集 / 100小时 / 100% 可选
+  */
+    total?: number;
+    /**
+     *  【核心】自定义显示文本。如果存在，直接优先显示此字段！
+     */
+    text?: string;
+}
 export interface MediaCardItem {
     /**id */
-    id: string | number;
+    id: number;
     /**作品标题 */
     title: string;
     /**图片地址 */
@@ -45,32 +59,14 @@ export interface MediaCardItem {
     /**进度 */
 
     // 🌟 通用进度数据模型
-    progress: {
-        /**
-         * 当前进度值（28集 / 45小时 / 85%）
-         */
-        current: number;
-        /**
-      * 总量（28集 / 100小时 / 100% 可选
-      */
-        total?: number;  
-        /**
-         *  单位（"话", "卷", "小时", "%"）
-         */   
-        unit?: string;       
-        /**
-         *  【核心】自定义显示文本。如果存在，直接优先显示此字段！
-         */
-        text?: string;        
-    };
+    progress: ProgressInfo
 }
 /*
 作品详情
 */
 export interface MediaCardDetail {
     /** 记录唯一ID */
-    id: string
-
+    id: number
     /** 作品名称 (如: 新蔷薇少女) */
     title: string
 
@@ -93,7 +89,7 @@ export interface MediaCardDetail {
     rating: number
 
     /** 进度 (如: 13集 / 第5卷 / 一周目通关) */
-    progress: string
+    progress?: ProgressInfo
 
     /** 封面图链接 */
     coverUrl?: string
@@ -103,7 +99,8 @@ export interface MediaCardDetail {
 
     /** 个人简评 / 吐槽 (你自己写的观后感) */
     comment?: string
-
+    /** 作品简介 */
+    introduction?: string
     // ================= 🌟 制作信息 (根据类型可选填写) =================
     /** 🌟 作者 / 原作 (漫画/小说主要字段，动画原作者) */
     author?: string

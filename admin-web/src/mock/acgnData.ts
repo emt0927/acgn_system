@@ -11,7 +11,7 @@ export const MockMedia: MediaCardItem[] = [
         "status": "doing",
         "statusLabel": "在追",
         "rating": 10,
-        "progress": { "current": 14, "total": 28, "unit": "话" }
+        "progress": { "current": 14, "total": 28}
     },
     {
         "id": 102,
@@ -21,8 +21,8 @@ export const MockMedia: MediaCardItem[] = [
         "subTypeLabel": "ARPG",
         "status": "doing",
         "statusLabel": "在玩",
-        "rating": 9.8,
-        "progress": { "current": 85, "total": 100, "unit": "小时", "text": "主线通关/85h" }
+        "rating": 9,
+        "progress": { "current": 0, "text": "主线通关/85h" }
     },
     {
         "id": 103,
@@ -32,16 +32,27 @@ export const MockMedia: MediaCardItem[] = [
         "subTypeLabel": "ACT",
         "status": "done",
         "statusLabel": "已通关",
-        "rating": 9.5,
-        "progress": { "current": 100, "text": "全成就白金" }
-    }
+        "rating": 5,
+        "progress": { "current": 0, "text": "全成就白金" }
+    },
+    {
+        "id": 103,
+        "title": "黑神话：悟空",
+        "cover": "/assets/wukong.jpg",
+        "type": "game",
+        "subTypeLabel": "ACT",
+        "status": "done",
+        "statusLabel": "已通关",
+        "rating": 5,
+        "progress": { "current": 0, "text": "全成就白金" }
+    },
 ]
 
 
 // 详情
 export const mockAcgnList: MediaCardDetail[] = [
     {
-        id: '1',
+        id: 101,
         title: '葬送的芙莉莲',
         originalTitle: '葬送のフリーレン',
         series: '葬送的芙莉莲',
@@ -49,7 +60,7 @@ export const mockAcgnList: MediaCardDetail[] = [
         subType: 'TV动画',
         status: 'done',
         rating: 10,
-        progress: '第 28 话',
+        progress: { "current": 14, 'total':100},
         coverUrl: 'https://p1.ssl.qhimg.com/t01d019f9e7f41d9a24.jpg',
         tags: ['奇幻', '治愈', '神作'],
         comment: '完美的动画化，演出和配乐都是顶级的！',
@@ -61,7 +72,7 @@ export const mockAcgnList: MediaCardDetail[] = [
         updatedAt: '2026-07-20'
     },
     {
-        id: '2',
+        id: 102,
         title: '电锯人',
         originalTitle: 'チェンソーマン',
         series: '电锯人',
@@ -69,7 +80,7 @@ export const mockAcgnList: MediaCardDetail[] = [
         subType: '少年漫画',
         status: 'doing',
         rating: 9,
-        progress: '第 150 话',
+        progress: { "current": 150},
         coverUrl: 'https://p1.ssl.qhimg.com/t01d019f9e7f41d9a24.jpg',
         tags: ['热血', '邪道', '战斗'],
         comment: '藤本树脑洞太大了，第二部依然不可预测。',
@@ -79,15 +90,15 @@ export const mockAcgnList: MediaCardDetail[] = [
         updatedAt: '2026-07-25'
     },
     {
-        id: '3',
+        id: 103,
         title: '黑神话：悟空',
         originalTitle: 'Black Myth: Wukong',
         series: '西游系列',
         type: 'game',
         subType: 'ARPG',
         status: 'doing',
-        rating: 9,
-        progress: '一周目盘丝洞',
+        rating: 5,
+        progress: { "text": "一周目盘丝洞" },
         coverUrl: 'https://p1.ssl.qhimg.com/t01d019f9e7f41d9a24.jpg',
         tags: ['动作', '西游', '单机', '国风'],
         comment: '打击感很棒，国风美术绝了。',
