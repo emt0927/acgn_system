@@ -18,10 +18,12 @@
             </n-radio-group>
             <n-form ref="formRef" :model="oneForm" :style="{ maxWidth: '640px' }" label-placement="left"
                 label-width="auto" :key="acgnType" :rules="rules" require-mark-placement="left">
-                <n-form-item label="封面"></n-form-item>
                 <n-form-item v-for="item in dynamicForm" :key="item.key" :label="item.label" :path="getItemPath(item)">
                     <n-input v-model:value="oneForm[item.key]" v-if="item.formType === 'textarea'" type="textarea"
                         :rows="3" />
+                    <n-upload v-else-if="item.formType === 'url'" list-type="image-card" :max="1"
+                        :default-upload="false" @change="handleFileChange" v-model:file-list="FileList">
+                    </n-upload>
                     <div style="display: flex; align-items: center; gap: 8px; width: 100%;"
                         v-else-if="item.formType === 'progress-pair'">
                         <n-input-number v-model:value="oneForm.progress.current" :min="0" placeholder="当前进度"
@@ -57,7 +59,7 @@
 import type { AcgnType, MediaCardDetail } from '@/types/acgn';
 import { computed, ref, watch } from 'vue';
 import { FIELD_SCHEMAS, type FieldConfig } from '../Schema';
-import type { FormInst, FormRules } from 'naive-ui';
+import type { FormInst, FormRules, UploadFileInfo } from 'naive-ui';
 const formRef = ref<FormInst | null>(null)
 const props = defineProps<{
     active: boolean,
@@ -95,6 +97,19 @@ const createFrom = (type: AcgnType) => {
     }
     return from
 }
+// 图片上传
+const FileList = ref<UploadFileInfo[]>([])
+const rawFile = ref<File | null>(null) // 专门在外面存原生文件的响应式变量
+const handleFileChange = ({ file }: { file: UploadFileInfo }) => {
+    if (file.status !== 'removed' && file.file) {
+        rawFile.value = file.file
+        oneForm.value.coverUrl = file.name
+    } else {
+        rawFile.value = null
+        oneForm.value.coverUrl = ''
+
+    }
+}
 //重置数据
 const result = () => {
     oneForm.value = createFrom(acgnType.value)
@@ -125,7 +140,7 @@ const rules = computed<FormRules>(() => {
             return
         }
         // 通用校验
-        const isSelect = field.formType === 'select' || field.formType === 'date'
+        const isSelect = field.formType === 'select' || field.formType === 'date' || field.formType === 'url'
         rulesObj[field.key] = {
             required: true,
             message: `请${isSelect ? '选择' : '输入'}${field.label}`,
@@ -145,6 +160,18 @@ watch(() => props.active, (isOpen) => {
     if (!isOpen) return
     if (props.detail) {
         //编辑
+        // 编辑图片
+        const existingUrl = props.detail.coverUrl
+        oneForm.value.coverUrl = existingUrl
+        FileList.value = [
+            {
+                id: 'existing.cover',
+                name: '封面图',
+                status: 'finished',
+                url: existingUrl
+            }
+        ]
+        rawFile.value = null // 编辑刚打开时，尚未选择“新文件”
         acgnType.value = props.detail.type || 'anime';
         const detailProgress = props.detail.progress
         let safeProgress
@@ -159,6 +186,9 @@ watch(() => props.active, (isOpen) => {
         oneForm.value = { ...props.detail, progress: safeProgress }
     } else {
         oneForm.value = createFrom(acgnType.value)
+        oneForm.value.coverUrl = ''
+        rawFile.value = null 
+        FileList.value = []
     }
 })
 // 新增切换重置内容
@@ -172,6 +202,12 @@ const handleValidateClick = (e: MouseEvent) => {
         if (!errors) {
             console.log('验证成功');
             console.log({ ...oneForm.value, type: acgnType.value });
+            // 传图片
+            let finalCoverUrl = oneForm.value.coverUrl
+            if (rawFile.value) {
+                const formData = new FormData()
+                formData.append('file', rawFile.value)
+            }
         } else {
             console.log('验证失败', errors);
         }

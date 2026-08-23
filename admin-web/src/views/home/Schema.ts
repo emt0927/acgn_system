@@ -1,7 +1,7 @@
 import type { AcgnType, MediaCardDetail } from "@/types/acgn"
 
 // 四种渲染状态
-type RenderType = 'rating' | 'block' | 'link' | 'state' | 'progress'
+type RenderType = 'rating' | 'block' | 'link' | 'state' | 'progress' | 'url'
 
 // 通用状态选项
 export const COMMON_STATUS_OPTIONS = [
@@ -25,6 +25,7 @@ export type FormType =
     | 'select'
     | 'rate'
     | 'date'
+    | 'url'
     | 'progress-pair' // 非游戏：{ current, total }
     | 'progress-text'; // 游戏：{ text }
 
@@ -40,7 +41,7 @@ export interface FieldConfig {
 // 公共类型
 // 头部
 const COMMON_HEADER: FieldConfig[] = [
-    // { label: '封面', key: 'coverUrl' },
+    { label: '封面', key: 'coverUrl', type: 'url', required: true, formType: 'url' },
     { label: '标题', key: 'title', required: true },
     { label: '原名', key: 'originalTitle' },
     { label: '系列', key: 'series', type: 'link', required: true },

@@ -48,7 +48,7 @@ export const MockMedia: MediaCardItem[] = [
     },
 ]
 
-
+import ldwsImg from '../assets/1.png'
 // 详情
 export const mockAcgnList: MediaCardDetail[] = [
     {
@@ -61,7 +61,7 @@ export const mockAcgnList: MediaCardDetail[] = [
         status: 'done',
         rating: 10,
         progress: { "current": 14, 'total':100},
-        coverUrl: 'https://p1.ssl.qhimg.com/t01d019f9e7f41d9a24.jpg',
+        coverUrl: ldwsImg,
         tags: ['奇幻', '治愈', '神作'],
         comment: '完美的动画化，演出和配乐都是顶级的！',
         author: '山田钟人 / 阿部司', // 原作作者

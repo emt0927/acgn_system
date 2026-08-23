@@ -10,14 +10,6 @@
             </n-button>
         </template>
         <div class=" max-h-130 overflow-x-hidden overflow-y-auto">
-            <div class="border-gray-200 border-b">
-                <div class="flex py-3 px-6">
-                    <span class="text-sm font-bold mr-3 w-16 ">封面 :</span>
-                    <n-image :img-props="{
-                        class: 'max-w-[220px] max-h-[220px] w-auto h-auto rounded-lg object-contain'
-                    }" :src="ldwsImg" />
-                </div>
-            </div>
             <div class="border-gray-200 border-b" v-for="field in activeSchema" :key="field.key">
 
                 <div class="flex py-3 px-6">
@@ -25,6 +17,9 @@
                     <n-button v-if="field.type === 'link'" text type="primary">
                         {{ item?.[field.key] }}
                     </n-button>
+                    <n-image v-else-if="field.type === 'url'" :img-props="{
+                        class: 'max-w-[220px] max-h-[220px] w-auto h-auto rounded-lg object-contain'
+                    }" :src="ldwsImg" />
                     <div v-else-if="field.type === 'rating'" class="flex items-center">
                         <n-rate readonly allow-half :value="Number(item?.[field.key]) / 2" />
                         <span class="ml-1">{{ item?.[field.key] }}分</span>
