@@ -34,7 +34,7 @@
             <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="12" :item-count="100" />
             </div>
             <!-- 抽屉组件 -->
-            <MyDrawer v-model:active="drawerState" :detail="drawerDetail"></MyDrawer>
+            <MyDrawer v-model:active="drawerState" :detail="drawerDetail" @getDetail="getDetail"></MyDrawer>
             <!-- 详情展示框 -->
             <MyModal v-model:show="showDetail" :item="selectedItem" @open-edit="handleOpenEditFromDetail"
                 @del-show="DelItem" />
@@ -61,9 +61,7 @@ const showDetail = ref(false)
 const handleOpenDetail = (id: number) => {
     showDetail.value = true
     selectedItem.value = mockAcgnList.find(item => item.id === id) || null
-    console.log(selectedItem.value, 'item');
 }
-console.log(MockMedia);
 
 // 抽屉状态
 const drawerState = ref(false)
@@ -71,16 +69,24 @@ const drawerState = ref(false)
 const drawerDetail = ref<MediaCardDetail | null>(null)
 // 新增作品
 const showDrawer = () => {
-    console.log('我是录入');
     drawerDetail.value = null
     drawerState.value = true
 
 }
+// 获取作品表单的数据
+const getDetail = (data: any) => {
+    if (data.formData) {
+        console.log('我是新增');
+    } else {
+        console.log('我是编辑');
+        console.log(data);
+    }
+    drawerState.value = false
+}
 // 详情弹出中的编辑传回来的数据
-const handleOpenEditFromDetail = () => {
+const handleOpenEditFromDetail = (detail:MediaCardDetail) => {
     // 抽屉数据
-    drawerDetail.value = selectedItem.value
-    console.log(drawerDetail.value, '编辑');
+    drawerDetail.value = detail
     drawerState.value = true
 }
 // 删除作品

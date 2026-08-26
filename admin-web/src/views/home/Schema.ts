@@ -1,4 +1,5 @@
-import type { AcgnType, MediaCardDetail } from "@/types/acgn"
+import { seriesData } from "@/mock/acgnData";
+import { SUB_TYPE_OPTIONS_MAP, type AcgnType, type MediaCardDetail } from "@/types/acgn"
 
 // 四种渲染状态
 type RenderType = 'rating' | 'block' | 'link' | 'state' | 'progress' | 'url'
@@ -18,6 +19,13 @@ export const GAME_STATUS_OPTIONS = [
     { label: '已通关', value: 'done' },
     { label: '已退坑', value: 'dropped' },
 ];
+
+// 状态的文字转换
+export const getStatusLabel = (type: string, status: string) => {
+    const options = type === 'game' ? GAME_STATUS_OPTIONS : COMMON_STATUS_OPTIONS
+    const match = options.find(item => item.value === status)
+    return match ? match.label : '未知'
+}
 // 表单type
 export type FormType =
     | 'input'
@@ -43,9 +51,7 @@ export interface FieldConfig {
 const COMMON_HEADER: FieldConfig[] = [
     { label: '封面', key: 'coverUrl', type: 'url', required: true, formType: 'url' },
     { label: '标题', key: 'title', required: true },
-    { label: '原名', key: 'originalTitle' },
-    { label: '系列', key: 'series', type: 'link', required: true },
-
+    { label: '原名', key: 'originalTitle' }
 ]
 // 尾部
 const getCommonFooter = (type: AcgnType): FieldConfig[] => {
@@ -69,16 +75,36 @@ const getCommonFooter = (type: AcgnType): FieldConfig[] => {
         { label: '评分', key: 'rating', type: 'rating', formType: 'rate' },
         { label: '个人点评', key: 'comment', type: 'block', formType: 'textarea' },
         { label: '作品介绍', key: 'introduction', formType: 'textarea' },
-        { label: '添加时间', key: 'updatedAt', editable: false },
         { label: '开始时间', key: 'startDate', formType: 'date' },
-        { label: '结束时间', key: 'finishDate', formType: 'date' }
+        { label: '结束时间', key: 'finishDate', formType: 'date' },
+        { label: '添加时间', key: 'updatedAt', editable: false },
     ]
+}
+
+// 系列函数
+const getSeries = (type: AcgnType): FieldConfig => {
+    const schema = seriesData.filter(item => item.type === type)
+    const arr = schema.map(item => {
+        return {
+            label: item.title,
+            value: String(item.id)
+        }
+    })
+    return {
+        label: '系列',
+        key: 'series',
+        type: 'link',
+        required: true,
+        formType: 'select',
+        options: arr
+    }
 }
 // 划分具体差异
 export const FIELD_SCHEMAS: Record<AcgnType, FieldConfig[]> = {
     anime: [
         ...COMMON_HEADER,
-        { label: '动画类型', key: 'subType', required: true },
+        getSeries('anime'),
+        { label: '类型', key: 'subType', required: true, formType: 'select', options: SUB_TYPE_OPTIONS_MAP['anime'] },
         { label: '原作', key: 'author' },
         { label: '导演', key: 'director' },
         { label: '动画公司', key: 'studio' },
@@ -86,17 +112,23 @@ export const FIELD_SCHEMAS: Record<AcgnType, FieldConfig[]> = {
     ],
     game: [
         ...COMMON_HEADER,
+        getSeries('game'),
+        { label: '类型', key: 'subType', required: true, formType: 'select', options: SUB_TYPE_OPTIONS_MAP['game'] },
         { label: '游戏公司', key: 'studio', required: true },
         ...getCommonFooter('game')
     ],
     manga: [
         ...COMMON_HEADER,
+        getSeries('manga'),
+        { label: '类型', key: 'subType', required: true, formType: 'select', options: SUB_TYPE_OPTIONS_MAP['manga'] },
         { label: '原作', key: 'author' },
         { label: '出版社', key: 'studio' },
         ...getCommonFooter('manga')
     ],
     novel: [
         ...COMMON_HEADER,
+         getSeries('novel'),
+        { label: '类型', key: 'subType', required: true, formType: 'select', options: SUB_TYPE_OPTIONS_MAP['novel'] },
         { label: '原作', key: 'author' },
         { label: '出版社', key: 'studio' },
         ...getCommonFooter('novel')

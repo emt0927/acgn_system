@@ -3,9 +3,9 @@
         class=" cursor-pointer group flex flex-col w-full relative rounded-lg bg-item  shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition duration-200 ease-in-out hover:-translate-y-0.5  hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
         <div class="flex justify-between absolute w-full top-0 left-0 pointer-events-none z-10">
             <div class="titleTag">
-                {{ item.subTypeLabel }}</div>
+                {{ item.subType }}</div>
             <div class="titleTag">
-                {{ item.statusLabel }}</div>
+                {{ getStatusLabel(item.type, item.status) }}</div>
         </div>
         <div class="overflow-hidden rounded-lg aspect-3/4 bg-muted relative">
             <span class="transition-opacity w-full h-full block ease-out duration-150"
@@ -29,6 +29,7 @@
 <script setup lang="ts">
 import type { MediaCardItem } from '@/types/acgn';
 import { computed } from 'vue';
+import { getStatusLabel } from '../Schema';
 const props = defineProps<{
     item: MediaCardItem
 }>()

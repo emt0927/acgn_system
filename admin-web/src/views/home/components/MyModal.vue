@@ -11,7 +11,6 @@
         </template>
         <div class=" max-h-130 overflow-x-hidden overflow-y-auto">
             <div class="border-gray-200 border-b" v-for="field in activeSchema" :key="field.key">
-
                 <div class="flex py-3 px-6">
                     <span class="text-sm font-bold mr-3 w-16 shrink-0">{{ field.label }} :</span>
                     <n-button v-if="field.type === 'link'" text type="primary">
@@ -73,7 +72,6 @@ const progressText = computed(() => {
 // 校验
 const hasValue = (val: any) => {
     if (val === undefined || val === null || val === '') return false
-    if (Array.isArray(val) && val.length === 0) return false
     return true
 }
 const activeSchema = computed(() => {

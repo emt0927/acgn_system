@@ -33,7 +33,7 @@
                             style="flex: 1;" />
                     </div>
                     <n-select v-else-if="item.formType === 'select'" v-model:value="oneForm[item.key]"
-                        placeholder="请选择..." :options="item.options" />
+                        :placeholder="`请选择${item.label}`" :options="item.options" />
                     <n-input v-model:value="oneForm[item.key].text" v-else-if="item.formType === 'progress-text'"
                         :placeholder="'请输入游玩进度'" />
                     <n-date-picker v-else-if="item.formType === 'date'" v-model:formatted-value="oneForm[item.key]"
@@ -65,7 +65,7 @@ const props = defineProps<{
     active: boolean,
     detail: MediaCardDetail | null
 }>()
-const emit = defineEmits(['update:active'])
+const emit = defineEmits(['update:active', 'getDetail'])
 const visible = computed({
     get: () => props.active,
     set: value => emit('update:active', value)
@@ -113,6 +113,8 @@ const handleFileChange = ({ file }: { file: UploadFileInfo }) => {
 //重置数据
 const result = () => {
     oneForm.value = createFrom(acgnType.value)
+    FileList.value = []
+    rawFile.value = null
     formRef.value?.restoreValidation()
 }
 
@@ -147,7 +149,6 @@ const rules = computed<FormRules>(() => {
             trigger: isSelect ? 'change' : ['blur', 'input']
         }
     })
-    console.log(rulesObj);
     return rulesObj
 })
 const getItemPath = (item: FieldConfig) => {
@@ -187,26 +188,32 @@ watch(() => props.active, (isOpen) => {
     } else {
         oneForm.value = createFrom(acgnType.value)
         oneForm.value.coverUrl = ''
-        rawFile.value = null 
+        rawFile.value = null
         FileList.value = []
     }
 })
 // 新增切换重置内容
 const handleTypeChange = (newType: AcgnType) => {
     oneForm.value = createFrom(newType)
+    rawFile.value = null
+    FileList.value = []
+    oneForm.value.type = acgnType.value
 }
 //验证
 const handleValidateClick = (e: MouseEvent) => {
     e.preventDefault()
     formRef.value?.validate((errors) => {
         if (!errors) {
-            console.log('验证成功');
-            console.log({ ...oneForm.value, type: acgnType.value });
             // 传图片
-            let finalCoverUrl = oneForm.value.coverUrl
+            // let finalCoverUrl = oneForm.value.coverUrl
             if (rawFile.value) {
                 const formData = new FormData()
                 formData.append('file', rawFile.value)
+                emit('getDetail', { ...oneForm.value, formData })
+                result()
+            } else {
+                emit('getDetail', oneForm.value)
+                result()
             }
         } else {
             console.log('验证失败', errors);
