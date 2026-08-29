@@ -10,7 +10,7 @@ export const MockMedia: MediaCardItem[] = [
         status: "doing",
         rating: 10,
         progress: { current: 14, total: 28 },
-        seriesId: 100
+        seriesId: 3
     },
     {
         id: 102,
@@ -108,7 +108,7 @@ export const seriesData: Series[] = [
     },
     {
         id: 3,
-        type: 'manga',
+        type: 'anime',
         title: '葬送的福利连',
         coverUrl: ldwsImg
     },
@@ -150,7 +150,7 @@ export const seriesDetail: SeriesDetail[] = [
     },
     {
         id: 3,
-        type: 'manga',
+        type: 'anime',
         title: '葬送的芙莉莲',
         originalTitle: '葬送のフリーレン',
         coverUrl: ldwsImg,

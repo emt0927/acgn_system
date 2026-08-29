@@ -23,8 +23,11 @@
             <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="12" :item-count="100" />
             </div>
         </div>
-        <SeriesModal v-model:show="showDetail" :detail="selectedItem" @open-edit="SeriesEdit"></SeriesModal>
+        <SeriesModal v-model:show="showDetail" :detail="selectedItem" @open-edit="SeriesEdit"
+            @openSeriesItem="getSeriesItem">
+        </SeriesModal>
         <SeriesDrawer v-model:show="active" :detail="seriesItem" @setSeriesData="setSeriesData"></SeriesDrawer>
+        <SeriesItemModal v-model:show="SeriesItemShow" :list="SeriesList" :id="SeriesId" @save="Save"></SeriesItemModal>
     </MyCard>
 </template>
 
@@ -32,10 +35,31 @@
 import MyCard from '@/components/MyCard.vue';
 import { computed, ref } from 'vue';
 import Content from './components/Content.vue';
-import type { Series, SeriesDetail } from '@/types/acgn.ts';
-import { seriesData, seriesDetail } from '@/mock/acgnData.ts';
+import type { AcgnType, MediaCardItem, Series, SeriesDetail } from '@/types/acgn.ts';
+import { MockMedia, seriesData, seriesDetail } from '@/mock/acgnData.ts';
 import SeriesModal from './components/SeriesModal.vue';
 import SeriesDrawer from './components/SeriesDrawer.vue';
+import SeriesItemModal from './components/SeriesItemModal.vue';
+const SeriesId = ref<string | number | null>(null)
+// 获取向系列添加作品需要的数据
+const SeriesItemShow = ref(false)
+const SeriesList = ref<MediaCardItem[] | null>(null)
+const getSeriesItem = (id: any, type: AcgnType) => {
+    // option用的数据
+    const list = MockMedia.filter(item => {
+        const isSameType = item.type === type
+        const isCurrentOrNoSeries = !item.seriesId || String(item.seriesId) === String(id)
+        // 保留同类型并且将当前系列或的作品保留
+        return isSameType && isCurrentOrNoSeries
+    })
+    SeriesList.value = list
+    SeriesId.value = id
+    SeriesItemShow.value = true
+}
+const Save = (arr:(string | number)[]) => {
+    console.log('回传的数据', arr);
+    SeriesItemShow.value = false
+}
 // 抽屉开关
 const active = ref(false)
 //传递给抽屉组件的系列相关数据

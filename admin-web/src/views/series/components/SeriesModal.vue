@@ -1,7 +1,15 @@
 <template>
-    <n-modal v-model:show="visible" :title="detail?.title" preset="card" :style="{ width: '450px' }"
+    <n-modal v-model:show="visible"  preset="card" :style="{ width: '450px' }"
         :segmented="{ content: true, footer: true }" :content-style="{ padding: 0 }">
+        <template #header>
+            <div class="truncate max-w-37.5">
+                {{ detail?.title }}
+            </div>
+        </template>
         <template #header-extra>
+            <n-button size="small" quaternary type="info" @click="setSeriesItem">
+                添加作品
+            </n-button>
             <n-button size="small" quaternary type="primary" @click="handleEdit">
                 编辑系列
             </n-button>
@@ -9,7 +17,7 @@
                 删除系列
             </n-button>
         </template>
-        <div class=" max-h-130 overflow-x-hidden overflow-y-auto">
+        <div class="max-h-130 overflow-x-hidden overflow-y-auto">
             <div class="border-gray-200 border-b" v-for="field in activeSchema" :key="field.key">
                 <div class="flex py-3 px-6">
                     <span class="text-sm font-bold mr-3 w-16 shrink-0">{{ field.label }} :</span>
@@ -41,12 +49,16 @@ const props = defineProps<{
     show: boolean
 
 }>()
-const emit = defineEmits(['update:show', 'open-edit', 'del-show'])
+const emit = defineEmits(['update:show', 'open-edit', 'del-show', 'open-SeriesItem'])
 // modal开关
 const visible = computed({
     get: () => props.show,
     set: (val) => emit('update:show', val)
 })
+// 向系列里添加作品
+const setSeriesItem = () => {
+    emit('open-SeriesItem', props.detail?.id, props.detail?.type)
+}
 // 编辑回显
 const handleEdit = () => {
     emit('open-edit', props.detail)

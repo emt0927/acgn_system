@@ -30,6 +30,7 @@
 import type { MediaCardItem } from '@/types/acgn';
 import { computed } from 'vue';
 import { getStatusLabel } from '../Schema';
+import { trackClickMediaApi } from '@/api/track';
 const props = defineProps<{
     item: MediaCardItem
 }>()
@@ -38,6 +39,8 @@ const emit = defineEmits<{
 }>()
 // 点击查看作品详情
 const handleCardClick = () => {
+    // 埋点
+    trackClickMediaApi({ mediaId: props.item.id, title: props.item.title, category: props.item.type })
     emit('click', props.item.id)
 }
 

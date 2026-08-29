@@ -92,7 +92,7 @@ export interface MediaCardItem {
     // 🌟 通用进度数据模型
     progress: ProgressInfo
     /**关联的系列id */
-    seriesId?: number
+    seriesId?: number | null
 }
 /*
 作品详情

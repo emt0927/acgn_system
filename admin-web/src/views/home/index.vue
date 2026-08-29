@@ -37,7 +37,7 @@
             <MyDrawer v-model:active="drawerState" :detail="drawerDetail" @getDetail="getDetail"></MyDrawer>
             <!-- 详情展示框 -->
             <MyModal v-model:show="showDetail" :item="selectedItem" @open-edit="handleOpenEditFromDetail"
-                @del-show="DelItem" />
+                @del-show="DelItem"/>
         </div>
     </MyCard>
 </template>
@@ -84,7 +84,7 @@ const getDetail = (data: any) => {
     drawerState.value = false
 }
 // 详情弹出中的编辑传回来的数据
-const handleOpenEditFromDetail = (detail:MediaCardDetail) => {
+const handleOpenEditFromDetail = (detail: MediaCardDetail) => {
     // 抽屉数据
     drawerDetail.value = detail
     drawerState.value = true
