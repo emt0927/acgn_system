@@ -1,5 +1,5 @@
 <template>
-    <div @click="handleCardClick"
+    <div @click="handleCardClick" v-thack="{ mediaId: item.id, title: item.title, type: item.type }"
         class=" cursor-pointer group flex flex-col w-full relative rounded-lg bg-item  shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition duration-200 ease-in-out hover:-translate-y-0.5  hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]">
         <div class="flex justify-between absolute w-full top-0 left-0 pointer-events-none z-10">
             <div class="titleTag">
@@ -30,7 +30,6 @@
 import type { MediaCardItem } from '@/types/acgn';
 import { computed } from 'vue';
 import { getStatusLabel } from '../Schema';
-import { trackClickMediaApi } from '@/api/track';
 const props = defineProps<{
     item: MediaCardItem
 }>()
@@ -39,8 +38,6 @@ const emit = defineEmits<{
 }>()
 // 点击查看作品详情
 const handleCardClick = () => {
-    // 埋点
-    trackClickMediaApi({ mediaId: props.item.id, title: props.item.title, category: props.item.type })
     emit('click', props.item.id)
 }
 
