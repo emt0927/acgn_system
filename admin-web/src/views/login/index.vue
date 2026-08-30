@@ -192,7 +192,7 @@ const Submit = (type: string) => {
                 const res = await loginApi(loginForm)
                 message.success(`${res.message}`)
                 // 将token存入仓库持久化
-                userStore.setToken(res.data?.token ?? '')
+                userStore.setToken(res.data!)
                 // 清空输入框数据
                 resetLoginForm()
                 // 跳转首页

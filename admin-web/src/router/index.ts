@@ -20,18 +20,18 @@ const router = createRouter({
                 name: 'home',
                 component: () => import('@/views/home/index.vue')
             }, {
-              path:'chart',
-              name:'chart',
-              component: () => import('@/views/chart/index.vue')
+                path: 'chart',
+                name: 'chart',
+                component: () => import('@/views/chart/index.vue')
             },
             {
-                path:'setting',
-                name:'setting',
+                path: 'setting',
+                name: 'setting',
                 component: () => import('@/views/mySetting/index.vue')
             },
             {
-                path:'series',
-                name:'series',
+                path: 'series',
+                name: 'series',
                 component: () => import('@/views/series/index.vue')
             }
             ]
@@ -44,7 +44,8 @@ export default router
 router.beforeEach((to, from, next) => {
     const userStore = useUserStore()
     const needsAuth = to.matched.some(record => record.meta.requiresAuth)
-    if (needsAuth && !userStore.token) {
+    const isToken = userStore.accessToken || userStore.refreshToken
+    if (needsAuth && !isToken) {
         console.log('我来了');
         // 记录用户原本想去的地方
         next({ name: 'login', query: { redirect: to.fullPath } })

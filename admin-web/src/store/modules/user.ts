@@ -1,12 +1,22 @@
+import type { tokenData } from "@/api/admin";
 import { useDark, useToggle } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
 export const useUserStore = defineStore('acng_system', () => {
-    const token = ref('')
+    // 短期token
+    const accessToken = ref('')
+    // 长期token
+    const refreshToken = ref('')
     // 设置token  
-    const setToken = (data: string) => {
-        token.value = data
+    const setToken = (data: tokenData) => {
+        accessToken.value = data.accessToken
+        refreshToken.value = data.refreshToken
+    }
+    // 清空token
+    const clearToken = () => {
+        accessToken.value = ''
+        refreshToken.value = ''
     }
 
     // theme 
@@ -26,7 +36,7 @@ export const useUserStore = defineStore('acng_system', () => {
             isDark.value = !isDark.value
         })
     }
-    return { token, setToken, isDark, toggleDark }
+    return { accessToken, refreshToken, setToken, isDark, toggleDark, clearToken }
 }, {
     persist: true
 })

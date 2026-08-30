@@ -37,7 +37,7 @@
             <MyDrawer v-model:active="drawerState" :detail="drawerDetail" @getDetail="getDetail"></MyDrawer>
             <!-- 详情展示框 -->
             <MyModal v-model:show="showDetail" :item="selectedItem" @open-edit="handleOpenEditFromDetail"
-                @del-show="DelItem"/>
+                @del-show="DelItem" />
         </div>
     </MyCard>
 </template>
@@ -51,6 +51,7 @@ import ContentCard from './components/ContentCard.vue';
 import MyDrawer from './components/MyDrawer.vue';
 import MyModal from './components/MyModal.vue';
 import type { MediaCardDetail } from '@/types/acgn.ts';
+import { getTest } from '@/api/track.ts';
 
 // 拿到详情数据
 // 传递给详情页的数据
@@ -68,7 +69,8 @@ const drawerState = ref(false)
 // 抽屉数据
 const drawerDetail = ref<MediaCardDetail | null>(null)
 // 新增作品
-const showDrawer = () => {
+const showDrawer = async () => {
+    await getTest()
     drawerDetail.value = null
     drawerState.value = true
 

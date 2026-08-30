@@ -1,7 +1,11 @@
+import { reToken } from "@/api/admin";
 import { useUserStore } from "@/store";
 import axios, { type AxiosRequestConfig } from "axios";
 import { createDiscreteApi } from "naive-ui";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 const { message } = createDiscreteApi(['message'])
+const router = useRouter()
 // 1. 创建实例
 const req = axios.create({
   baseURL: 'http://localhost:3000',
@@ -12,15 +16,19 @@ const req = axios.create({
 req.interceptors.request.use(function (config) {
   // 引入user仓库
   const userStore = useUserStore()
-  const token = userStore.token
+  const token = userStore.accessToken
   if (token) {
-    config.headers.Authorization = token
+    config.headers.Authorization = `Bearer ${token}`
   }
   return config;
 }, function (error) {
   return Promise.reject(error);
 });
-
+// 无感刷新token
+// 状态锁
+const isRefreshing = ref(false)
+// 等待队列
+const retryQueue = ref<((token: string) => void)[]>([])
 // 3. 响应拦截器（脱皮：把 response.data 剥出来）
 req.interceptors.response.use(function (response) {
   const res = response.data;
@@ -29,7 +37,48 @@ req.interceptors.response.use(function (response) {
     return Promise.reject(res)
   }
   return response.data;
-}, function (error) {
+}, async function (error) {
+  const config = error.config
+  const userStore = useUserStore()
+  // 长token失效了
+  if (config.url === '/auth/refresh') {
+    // 清空token
+    userStore.clearToken()
+    // 跳转到登录页
+    router.replace({ name: 'login' })
+    return Promise.reject(error)
+  }
+  if (error.response?.status === 401) {
+    if (isRefreshing.value) {
+      return new Promise(resolve => {
+        retryQueue.value.push((newToken) => {
+          config.headers.Authorization = `Bearer ${newToken}`
+          resolve(request(config))
+        })
+      })
+    }
+    isRefreshing.value = true
+    try {
+      // 换回来的token
+      const res = await reToken(userStore.refreshToken)
+      userStore.accessToken = res.data?.accessToken ?? ''
+      config.headers.Authorization = `Bearer ${userStore.accessToken}`
+      // 重新发起等待的请求
+      retryQueue.value.forEach(callback => callback(res.data?.accessToken as string))
+      // 清空队列
+      retryQueue.value = []
+      // 重新发送当前请求
+      return request(config)
+    } catch (error) {
+      //数新失败
+      retryQueue.value = []
+      userStore.clearToken()
+      router.replace({ name: 'login' })
+      return Promise.reject(error)
+    } finally {
+      isRefreshing.value = false
+    }
+  }
   const msg = error.response?.data?.message || error.message || '网络或服务器错误'
   message.error(msg)
   return Promise.reject(new Error(msg))

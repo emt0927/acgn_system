@@ -9,3 +9,8 @@ export interface TrackLog {
 export const trackClickMediaApi = (data: TrackLog) => {
     // request.post('api/chack', data)
 }
+
+// 测试
+export const getTest = () => {
+    return request.post('/media/test')
+}
