@@ -40,7 +40,7 @@ router.post('/login', async (req, res) => {
     }
     // 短token 
     const accessToken = jwt.sign(
-        { id: user._id, username: user.username },
+        { id: user._id},
         JWT_SECRET,
         { expiresIn: '2h' }
     )
@@ -58,13 +58,13 @@ router.post('/login', async (req, res) => {
 router.post('/refresh', (req, res) => {
     const { token } = req.body
     if (!token) {
-        return res.status(401).json({ code: 401, message: '未提供refreshToken' })
+        return res.json({ code: 401, message: '未提供refreshToken' })
     }
     try {
-        const decoded = jwt.verify(token.trim(), REFRESH_TOKEN_SECRET)
+        const decoded = jwt.verify(token, REFRESH_TOKEN_SECRET)
         // 校验通过
         const newAccessToken = jwt.sign(
-            { id: decoded.id, username: decoded.username },
+            { id: decoded.id},
             JWT_SECRET,
             { expiresIn: '2h' }
         )
@@ -78,7 +78,7 @@ router.post('/refresh', (req, res) => {
         })
     } catch (error) {
         console.log('refreshToken 校验失败:', error.message)
-        return res.status(401).json({
+        return res.json({
             code: 401,
             message: '长登录状态已过期，请重新登录'
         })

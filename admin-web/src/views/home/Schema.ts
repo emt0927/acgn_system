@@ -94,7 +94,6 @@ const getSeries = (type: AcgnType): FieldConfig => {
         label: '系列',
         key: 'series',
         type: 'link',
-        required: true,
         formType: 'select',
         options: arr
     }

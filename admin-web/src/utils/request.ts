@@ -3,9 +3,8 @@ import { useUserStore } from "@/store";
 import axios, { type AxiosRequestConfig } from "axios";
 import { createDiscreteApi } from "naive-ui";
 import { ref } from "vue";
-import { useRouter } from "vue-router";
 const { message } = createDiscreteApi(['message'])
-const router = useRouter()
+import router from "@/router";
 // 1. 创建实例
 const req = axios.create({
   baseURL: 'http://localhost:3000',
@@ -30,27 +29,22 @@ const isRefreshing = ref(false)
 // 等待队列
 const retryQueue = ref<((token: string) => void)[]>([])
 // 3. 响应拦截器（脱皮：把 response.data 剥出来）
-req.interceptors.response.use(function (response) {
+req.interceptors.response.use(async function (response) {
   const res = response.data;
-  if (res.code && res.code !== 200) {
-    message.error(res.message || '业务处理失败')
-    return Promise.reject(res)
-  }
-  return response.data;
-}, async function (error) {
-  const config = error.config
+  const config = response.config
   const userStore = useUserStore()
-  // 长token失效了
-  if (config.url === '/auth/refresh') {
-    // 清空token
-    userStore.clearToken()
-    // 跳转到登录页
-    router.replace({ name: 'login' })
-    return Promise.reject(error)
-  }
-  if (error.response?.status === 401) {
+  // 401 长期登录
+  if (res.code === 401) {
+    if (config.url === '/auth/refresh') {
+      // 长token也失效了
+      retryQueue.value = []
+      userStore.clearToken() // 清空pinia中的Token
+      router.replace({ name: 'login' }) // 跳到登录页重新登录
+      return
+    }
     if (isRefreshing.value) {
-      return new Promise(resolve => {
+      //将后续请求存入等待队列挂起
+      return new Promise<any>(resolve => {
         retryQueue.value.push((newToken) => {
           config.headers.Authorization = `Bearer ${newToken}`
           resolve(request(config))
@@ -58,19 +52,22 @@ req.interceptors.response.use(function (response) {
       })
     }
     isRefreshing.value = true
+    // 第一个请求进来 拿长token换一个新的短token
     try {
-      // 换回来的token
       const res = await reToken(userStore.refreshToken)
-      userStore.accessToken = res.data?.accessToken ?? ''
-      config.headers.Authorization = `Bearer ${userStore.accessToken}`
-      // 重新发起等待的请求
-      retryQueue.value.forEach(callback => callback(res.data?.accessToken as string))
-      // 清空队列
+      if (res.code !== 200 || !res.data?.accessToken) throw new Error('校验失败')
+      const newToken = res.data.accessToken
+      // 更新请求头
+      config.headers.Authorization = `Bearer ${newToken}`
+      // 更新pinia
+      userStore.accessToken = newToken
+      // 遍历发送后续挂起的请求
+      retryQueue.value.forEach(callback => callback(newToken))
       retryQueue.value = []
       // 重新发送当前请求
       return request(config)
     } catch (error) {
-      //数新失败
+      //校验失败
       retryQueue.value = []
       userStore.clearToken()
       router.replace({ name: 'login' })
@@ -79,6 +76,12 @@ req.interceptors.response.use(function (response) {
       isRefreshing.value = false
     }
   }
+  if (res.code !== 200) {
+    message.error(res.message || '业务请求失败')
+    return Promise.reject(new Error(res.message))
+  }
+  return response.data;
+}, async function (error) {
   const msg = error.response?.data?.message || error.message || '网络或服务器错误'
   message.error(msg)
   return Promise.reject(new Error(msg))

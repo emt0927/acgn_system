@@ -1,6 +1,6 @@
 <template>
     <MyCard>
-        chart
+        <img :src="'/uploads/1788198809026-145073195.jpg'" alt="封面测试">
     </MyCard>
 </template>
 

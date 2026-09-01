@@ -28,13 +28,15 @@
         <div class="flex flex-col justify-between w-full pt-5">
             <div
                 class="flex-1 content-start grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
-                <ContentCard v-for="item in MockMedia" :key="item.id" :item="item" @click="handleOpenDetail">
+                <ContentCard v-for="item in mediaList" :key="item.id" :item="item" @click="handleOpenDetail">
                 </ContentCard>
             </div>
-            <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="12" :item-count="100" />
+            <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="pageSize"
+                    :item-count="total" />
             </div>
             <!-- 抽屉组件 -->
-            <MyDrawer v-model:active="drawerState" :detail="drawerDetail" @getDetail="getDetail"></MyDrawer>
+            <MyDrawer v-model:active="drawerState" :detail="drawerDetail" @setDetail="setDetail">
+            </MyDrawer>
             <!-- 详情展示框 -->
             <MyModal v-model:show="showDetail" :item="selectedItem" @open-edit="handleOpenEditFromDetail"
                 @del-show="DelItem" />
@@ -45,23 +47,33 @@
 <script setup lang="ts">
 import MyCard from '@/components/MyCard.vue';
 import { computed, ref } from 'vue';
-// 引入mock数据
-import { mockAcgnList, MockMedia } from '@/mock/acgnData';
 import ContentCard from './components/ContentCard.vue';
 import MyDrawer from './components/MyDrawer.vue';
 import MyModal from './components/MyModal.vue';
-import type { MediaCardDetail } from '@/types/acgn.ts';
-import { getTest } from '@/api/track.ts';
+import type { MediaCardDetail, MediaCardItem } from '@/types/acgn.ts';
+import { addMediaApi, getMediaListApi } from '@/api/media.ts';
+// 分页
+const page = ref(1)
+const pageSize = ref(12)
+const total = ref(0)
+const mediaList = ref<MediaCardItem[]>()
+// 获取作品列表
+const getMediaList = async () => {
+    const res = await getMediaListApi({ page: page.value, pageSize: pageSize.value })
+    console.log(res);
+    mediaList.value = res.data?.list
+    total.value = res.data!.total
 
+}
+getMediaList()
 // 拿到详情数据
 // 传递给详情页的数据
 const selectedItem = ref<MediaCardDetail | null>(null)
-
 // 作品详情的开关 
 const showDetail = ref(false)
-const handleOpenDetail = (id: number) => {
+const handleOpenDetail = (id: string) => {
+    console.log(id);
     showDetail.value = true
-    selectedItem.value = mockAcgnList.find(item => item.id === id) || null
 }
 
 // 抽屉状态
@@ -70,21 +82,26 @@ const drawerState = ref(false)
 const drawerDetail = ref<MediaCardDetail | null>(null)
 // 新增作品
 const showDrawer = async () => {
-    await getTest()
     drawerDetail.value = null
     drawerState.value = true
 
 }
-// 获取作品表单的数据
-const getDetail = (data: any) => {
-    if (data.formData) {
-        console.log('我是新增');
-    } else {
+// 添加or编辑作品
+import { useMessage } from 'naive-ui'
+const message = useMessage()
+const setDetail = async (data: any) => {
+    if (data.id) {
         console.log('我是编辑');
         console.log(data);
+    } else {
+        console.log('我是添加');
+        console.log(data);
+        const res = await addMediaApi(data)
+        message.success(res.message)
     }
     drawerState.value = false
 }
+
 // 详情弹出中的编辑传回来的数据
 const handleOpenEditFromDetail = (detail: MediaCardDetail) => {
     // 抽屉数据
@@ -114,8 +131,7 @@ const handleSelect = (key: string | number) => {
     console.log('key');
 }
 
-// 分页
-const page = ref(3)
+
 // 图片懒加载
 const isLoaded = ref(true)
 

@@ -1,38 +1,6 @@
-import type { MediaCardDetail, MediaCardItem, Series, SeriesDetail } from "@/types/acgn";
+import type { MediaCardDetail, Series, SeriesDetail } from "@/types/acgn";
 import ldwsImg from '@/assets/ldws.jpg'
-export const MockMedia: MediaCardItem[] = [
-    {
-        id: 101,
-        title: "葬送的芙莉莲",
-        coverUrl: ldwsImg,
-        type: "anime",
-        subType: "TV动画",
-        status: "doing",
-        rating: 10,
-        progress: { current: 14, total: 28 },
-        seriesId: 3
-    },
-    {
-        id: 102,
-        title: "电锯人",
-        coverUrl: ldwsImg,
-        type: "manga",
-        subType: "Web动画",
-        status: "doing",
-        rating: 9,
-        progress: { current: 150 }
-    },
-    {
-        id: 103,
-        title: "黑神话：悟空",
-        coverUrl: ldwsImg,
-        type: "game",
-        subType: "ACT动作",
-        status: "doing",
-        rating: 5,
-        progress: { text: "一周目盘丝洞" }
-    }
-];
+
 
 // 2. 详情数据
 export const mockAcgnList: MediaCardDetail[] = [

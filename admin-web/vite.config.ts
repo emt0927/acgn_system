@@ -28,6 +28,12 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    open: true // 启动时自动打开浏览器
-  }
+    open: true, // 启动时自动打开浏览器
+    proxy: {
+      '/uploads': {
+        target:'http://localhost:3000', //转发给后端express
+        changeOrigin:true
+      }
+    }
+  } 
 })

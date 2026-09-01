@@ -60,12 +60,13 @@ import type { AcgnType, MediaCardDetail } from '@/types/acgn';
 import { computed, ref, watch } from 'vue';
 import { FIELD_SCHEMAS, type FieldConfig } from '../Schema';
 import type { FormInst, FormRules, UploadFileInfo } from 'naive-ui';
+import { uploadCoverUrlApi } from '@/api/upload';
 const formRef = ref<FormInst | null>(null)
 const props = defineProps<{
     active: boolean,
     detail: MediaCardDetail | null
 }>()
-const emit = defineEmits(['update:active', 'getDetail'])
+const emit = defineEmits(['update:active', 'addDetail', 'setDetail'])
 const visible = computed({
     get: () => props.active,
     set: value => emit('update:active', value)
@@ -113,6 +114,8 @@ const handleFileChange = ({ file }: { file: UploadFileInfo }) => {
 //重置数据
 const result = () => {
     oneForm.value = createFrom(acgnType.value)
+    acgnType.value = 'anime'
+    oneForm.value.type = 'anime'
     FileList.value = []
     rawFile.value = null
     formRef.value?.restoreValidation()
@@ -188,6 +191,7 @@ watch(() => props.active, (isOpen) => {
     } else {
         oneForm.value = createFrom(acgnType.value)
         oneForm.value.coverUrl = ''
+        oneForm.value.type = acgnType.value
         rawFile.value = null
         FileList.value = []
     }
@@ -202,19 +206,18 @@ const handleTypeChange = (newType: AcgnType) => {
 //验证
 const handleValidateClick = (e: MouseEvent) => {
     e.preventDefault()
-    formRef.value?.validate((errors) => {
+    formRef.value?.validate(async (errors) => {
         if (!errors) {
             // 传图片
-            // let finalCoverUrl = oneForm.value.coverUrl
             if (rawFile.value) {
                 const formData = new FormData()
                 formData.append('file', rawFile.value)
-                emit('getDetail', { ...oneForm.value, formData })
-                result()
-            } else {
-                emit('getDetail', oneForm.value)
-                result()
+                // 上传图片
+                const res = await uploadCoverUrlApi(formData)
+                oneForm.value.coverUrl = res.data?.url
             }
+            emit('setDetail', oneForm.value)
+            result()
         } else {
             console.log('验证失败', errors);
         }
