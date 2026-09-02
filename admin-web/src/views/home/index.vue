@@ -51,7 +51,7 @@ import ContentCard from './components/ContentCard.vue';
 import MyDrawer from './components/MyDrawer.vue';
 import MyModal from './components/MyModal.vue';
 import type { MediaCardDetail, MediaCardItem } from '@/types/acgn.ts';
-import { addMediaApi, getMediaListApi } from '@/api/media.ts';
+import { addMediaApi, getMediaDetailApi, getMediaListApi } from '@/api/media.ts';
 // 分页
 const page = ref(1)
 const pageSize = ref(12)
@@ -71,14 +71,17 @@ getMediaList()
 const selectedItem = ref<MediaCardDetail | null>(null)
 // 作品详情的开关 
 const showDetail = ref(false)
-const handleOpenDetail = (id: string) => {
-    console.log(id);
+const handleOpenDetail = async (id: string) => {
+    console.log(id, '详情id');
+    const res = await getMediaDetailApi(id)
+    console.log(res.data);
+    selectedItem.value = res.data
     showDetail.value = true
 }
 
 // 抽屉状态
 const drawerState = ref(false)
-// 抽屉数据
+// 作品详情数据
 const drawerDetail = ref<MediaCardDetail | null>(null)
 // 新增作品
 const showDrawer = async () => {

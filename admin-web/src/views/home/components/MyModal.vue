@@ -18,7 +18,7 @@
                     </n-button>
                     <n-image v-else-if="field.type === 'url'" :img-props="{
                         class: 'max-w-[220px] max-h-[220px] w-auto h-auto rounded-lg object-contain'
-                    }" :src="ldwsImg" />
+                    }" :src="item?.[field.key]" />
                     <div v-else-if="field.type === 'rating'" class="flex items-center">
                         <n-rate readonly allow-half :value="Number(item?.[field.key]) / 2" />
                         <span class="ml-1">{{ item?.[field.key] }}分</span>
@@ -29,6 +29,9 @@
                     <div v-else-if="field.type === 'progress'">
                         {{ progressText }}
                     </div>
+                    <div v-else-if="field.type === 'date'">
+                        <n-time :time="new Date(item![field.key] as string)" format="yyyy-MM-dd HH:mm" />
+                    </div>
                     <div v-else>{{ item?.[field.key] }}</div>
                 </div>
             </div>
@@ -37,8 +40,7 @@
 </template>
 
 <script setup lang="ts">
-// 测试图片
-import ldwsImg from '@/assets/ldws.jpg'
+
 
 const emit = defineEmits(['update:show', 'open-edit', 'del-show'])
 import type { AcgnStatus, MediaCardDetail } from '@/types/acgn';

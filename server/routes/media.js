@@ -75,4 +75,28 @@ router.get('/getList', token, async (req, res) => {
         })
     }
 })
+// 获取作品详情
+router.get('/getDetail/:id', token, async (req, res) => {
+    try {
+        const { id } = req.params
+        const detail = await media.findOne({
+            _id: id,
+            userId: req.userId
+        }).lean()
+        const data = { ...detail, id: detail._id }
+        if (!detail) {
+            return res.json({
+                code: 404,
+                message: '作品不存在或无权查看'
+            })
+        }
+        res.json({
+            code: 200,
+            message: '获取作品详情成功',
+            data
+        })
+    } catch (error) {
+        return res.status(500).json({ code: 500, message: error.message })
+    }
+})
 module.exports = router

@@ -2,7 +2,7 @@ import { seriesData } from "@/mock/acgnData";
 import { SUB_TYPE_OPTIONS_MAP, type AcgnType, type MediaCardDetail } from "@/types/acgn"
 
 // 四种渲染状态
-type RenderType = 'rating' | 'block' | 'link' | 'state' | 'progress' | 'url'
+type RenderType = 'rating' | 'block' | 'link' | 'state' | 'progress' | 'url' | 'date'
 
 // 通用状态选项
 export const COMMON_STATUS_OPTIONS = [
@@ -77,7 +77,7 @@ const getCommonFooter = (type: AcgnType): FieldConfig[] => {
         { label: '作品介绍', key: 'introduction', formType: 'textarea' },
         { label: '开始时间', key: 'startDate', formType: 'date' },
         { label: '结束时间', key: 'finishDate', formType: 'date' },
-        { label: '添加时间', key: 'updatedAt', editable: false },
+        { label: '添加时间', key: 'updatedAt', editable: false, type: 'date' },
     ]
 }
 
@@ -126,7 +126,7 @@ export const FIELD_SCHEMAS: Record<AcgnType, FieldConfig[]> = {
     ],
     novel: [
         ...COMMON_HEADER,
-         getSeries('novel'),
+        getSeries('novel'),
         { label: '类型', key: 'subType', required: true, formType: 'select', options: SUB_TYPE_OPTIONS_MAP['novel'] },
         { label: '原作', key: 'author' },
         { label: '出版社', key: 'studio' },

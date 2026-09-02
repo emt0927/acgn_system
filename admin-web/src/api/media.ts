@@ -18,3 +18,8 @@ export const getMediaListApi = (data: pageData) => {
         }
     })
 }
+
+// 获取作品详情
+export const getMediaDetailApi = (id: string) => {
+    return request.get(`/media/getDetail/${id}`)
+}
