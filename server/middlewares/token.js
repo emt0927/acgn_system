@@ -7,12 +7,10 @@ const auth = (req, res, next) => {
         return res.json({ code: 401, message: '未提供Token 请先登录!' })
     }
     const token = rawToken.replace(/^Bearer\s+/, '').trim()
-    console.log(token, '后端token');
     // 用 JSON.stringify 包包裹起来，如果有空格或换行，双引号内部会无所遁形
     try {
         // 解密token
         const decoded = jwt.verify(token, JWT_SECRET)
-        console.log(decoded);
         // 用户账号id
         req.userId = decoded.id
         next()

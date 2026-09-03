@@ -11,7 +11,7 @@ export interface pageData {
     page: number,
     pageSize: number
 }
-export const getMediaListApi = (data: pageData) => {
+export const getMediaListApi = (data?: pageData) => {
     return request.get<{ list: MediaCardItem[], total: number }>('/media/getList', {
         params: {
             ...data
@@ -22,4 +22,14 @@ export const getMediaListApi = (data: pageData) => {
 // 获取作品详情
 export const getMediaDetailApi = (id: string) => {
     return request.get(`/media/getDetail/${id}`)
+}
+
+// 修改作品详情
+export const putUpdateMediaApi = (data: any) => {
+    return request.put(`/media/updateMedia`, data)
+}
+
+// 删除作品
+export const deleteMediaApi = (id: string) => {
+    return request.delete(`/media/delete/${id}`)
 }

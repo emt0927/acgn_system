@@ -36,27 +36,34 @@ import MyCard from '@/components/MyCard.vue';
 import { computed, ref } from 'vue';
 import Content from './components/Content.vue';
 import type { AcgnType, MediaCardItem, Series, SeriesDetail } from '@/types/acgn.ts';
-import { MockMedia, seriesData, seriesDetail } from '@/mock/acgnData.ts';
+import { seriesData, seriesDetail } from '@/mock/acgnData.ts';
 import SeriesModal from './components/SeriesModal.vue';
 import SeriesDrawer from './components/SeriesDrawer.vue';
 import SeriesItemModal from './components/SeriesItemModal.vue';
+import { getMediaListApi } from '@/api/media.ts';
 const SeriesId = ref<string | number | null>(null)
 // 获取向系列添加作品需要的数据
 const SeriesItemShow = ref(false)
 const SeriesList = ref<MediaCardItem[] | null>(null)
+const mediaList = ref<MediaCardItem[] | null>(null)
+const getMediaList = async () => {
+    const res = await getMediaListApi()
+    mediaList.value = res.data!.list
+}
+getMediaList()
 const getSeriesItem = (id: any, type: AcgnType) => {
     // option用的数据
-    const list = MockMedia.filter(item => {
+    const list = mediaList.value?.filter(item => {
         const isSameType = item.type === type
         const isCurrentOrNoSeries = !item.seriesId || String(item.seriesId) === String(id)
         // 保留同类型并且将当前系列或的作品保留
         return isSameType && isCurrentOrNoSeries
     })
-    SeriesList.value = list
+    SeriesList.value = list!
     SeriesId.value = id
     SeriesItemShow.value = true
 }
-const Save = (arr:(string | number)[]) => {
+const Save = (arr: (string | number)[]) => {
     console.log('回传的数据', arr);
     SeriesItemShow.value = false
 }

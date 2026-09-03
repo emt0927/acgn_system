@@ -51,7 +51,7 @@ import ContentCard from './components/ContentCard.vue';
 import MyDrawer from './components/MyDrawer.vue';
 import MyModal from './components/MyModal.vue';
 import type { MediaCardDetail, MediaCardItem } from '@/types/acgn.ts';
-import { addMediaApi, getMediaDetailApi, getMediaListApi } from '@/api/media.ts';
+import { addMediaApi, deleteMediaApi, getMediaDetailApi, getMediaListApi, putUpdateMediaApi } from '@/api/media.ts';
 // 分页
 const page = ref(1)
 const pageSize = ref(12)
@@ -72,9 +72,7 @@ const selectedItem = ref<MediaCardDetail | null>(null)
 // 作品详情的开关 
 const showDetail = ref(false)
 const handleOpenDetail = async (id: string) => {
-    console.log(id, '详情id');
     const res = await getMediaDetailApi(id)
-    console.log(res.data);
     selectedItem.value = res.data
     showDetail.value = true
 }
@@ -94,8 +92,9 @@ import { useMessage } from 'naive-ui'
 const message = useMessage()
 const setDetail = async (data: any) => {
     if (data.id) {
-        console.log('我是编辑');
-        console.log(data);
+        const res = await putUpdateMediaApi(data)
+        message.success(res.message)
+        showDetail.value = false
     } else {
         console.log('我是添加');
         console.log(data);
@@ -103,6 +102,7 @@ const setDetail = async (data: any) => {
         message.success(res.message)
     }
     drawerState.value = false
+    getMediaList()
 }
 
 // 详情弹出中的编辑传回来的数据
@@ -112,8 +112,11 @@ const handleOpenEditFromDetail = (detail: MediaCardDetail) => {
     drawerState.value = true
 }
 // 删除作品
-const DelItem = () => {
-    console.log(selectedItem.value?.id, '我是删除');
+const DelItem = async (id: string) => {
+    const res = await deleteMediaApi(id)
+    message.success(res.message)
+    showDetail.value = false
+    getMediaList()
 }
 
 // 排序选择
