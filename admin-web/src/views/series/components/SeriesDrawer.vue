@@ -45,6 +45,7 @@ import type { AcgnType, SeriesDetail } from '@/types/acgn';
 import { computed, ref, watch } from 'vue';
 import { SERIES_SCHEMAS } from '../Schema';
 import type { FormInst, FormRules, UploadFileInfo } from 'naive-ui';
+import { uploadCoverUrlApi } from '@/api/upload';
 const props = defineProps<{
     detail: SeriesDetail | null
 }>()
@@ -130,15 +131,15 @@ const emit = defineEmits(['setSeriesData'])
 // 提交校验
 const handleValidateClick = (e: MouseEvent) => {
     e.preventDefault() // 阻止默认事件
-    formRef.value?.validate(errors => {
+    formRef.value?.validate(async errors => {
         if (!errors) {
             if (rawFile.value) {
                 const formdata = new FormData()
                 formdata.append('file', rawFile.value)
-                emit('setSeriesData', { ...oneForm.value, formdata })
-            } else {
-                emit('setSeriesData', oneForm.value)
+                const res = await uploadCoverUrlApi(formdata)
+                oneForm.value.coverUrl = res.data?.url
             }
+            emit('setSeriesData', oneForm.value)
         } else {
             console.log('校验失败', errors);
         }

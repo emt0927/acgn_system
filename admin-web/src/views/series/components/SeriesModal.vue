@@ -1,5 +1,5 @@
 <template>
-    <n-modal v-model:show="visible"  preset="card" :style="{ width: '450px' }"
+    <n-modal v-model:show="visible" preset="card" :style="{ width: '450px' }"
         :segmented="{ content: true, footer: true }" :content-style="{ padding: 0 }">
         <template #header>
             <div class="truncate max-w-37.5">
@@ -25,9 +25,9 @@
                         class: 'max-w-[220px] max-h-[220px] w-auto h-auto rounded-lg object-contain'
                     }" :src="detail?.[field.key]"></n-image>
                     <div class="flex" v-else-if="field.type === 'tags'">
-                        <n-tag type="success" v-for="item in detail?.[field.key]" class="mr-2">
-                            {{ item }}
-                        </n-tag>
+                            <n-tag type="success" v-for="item in detail?.[field.key]" class="mr-2">
+                                {{ item }}
+                            </n-tag>
                     </div>
                     <n-ellipsis style="max-width: 100%" :line-clamp="2" v-else-if="field.type === 'comment'">
                         {{ detail?.[field.key] }}
@@ -69,7 +69,7 @@ const handleDel = () => {
 }
 // 校验
 const hasValue = (val: any) => {
-    if (val === undefined || val === null || val === '') return false
+    if (val === undefined || val === null || val === '' || val.length === 0) return false
     return true
 }
 const activeSchema = computed(() => {

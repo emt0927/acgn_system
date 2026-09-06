@@ -93,6 +93,7 @@ const message = useMessage()
 const setDetail = async (data: any) => {
     if (data.id) {
         const res = await putUpdateMediaApi(data)
+        console.log(data);
         message.success(res.message)
         showDetail.value = false
     } else {

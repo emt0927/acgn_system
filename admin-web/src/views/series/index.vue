@@ -20,7 +20,8 @@
                 class="flex-1 content-start grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
                 <Content v-for="item in seriesList" :key="item.id" :item=item @click="openDetail"></Content>
             </div>
-            <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="12" :item-count="100" />
+            <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="pageSize"
+                    :item-count="total" />
             </div>
         </div>
         <SeriesModal v-model:show="showDetail" :detail="selectedItem" @open-edit="SeriesEdit"
@@ -33,24 +34,19 @@
 
 <script setup lang="ts">
 import MyCard from '@/components/MyCard.vue';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import Content from './components/Content.vue';
 import type { AcgnType, MediaCardItem, Series, SeriesDetail } from '@/types/acgn.ts';
-import { seriesData, seriesDetail } from '@/mock/acgnData.ts';
 import SeriesModal from './components/SeriesModal.vue';
 import SeriesDrawer from './components/SeriesDrawer.vue';
 import SeriesItemModal from './components/SeriesItemModal.vue';
-import { getMediaListApi } from '@/api/media.ts';
+import { addSeriesApi, getSeriesDetailApi, getSeriesListApi, putSeriesDetailApi } from '@/api/serires.ts';
 const SeriesId = ref<string | number | null>(null)
 // 获取向系列添加作品需要的数据
 const SeriesItemShow = ref(false)
 const SeriesList = ref<MediaCardItem[] | null>(null)
 const mediaList = ref<MediaCardItem[] | null>(null)
-const getMediaList = async () => {
-    const res = await getMediaListApi()
-    mediaList.value = res.data!.list
-}
-getMediaList()
+
 const getSeriesItem = (id: any, type: AcgnType) => {
     // option用的数据
     const list = mediaList.value?.filter(item => {
@@ -82,18 +78,26 @@ const SeriesEdit = (detail: SeriesDetail) => {
     active.value = true
 }
 // 抽屉组件传递回来的系列数据
-const setSeriesData = (data: any) => {
-    if (data.formdata) {
-        console.log('我是录入');
-        console.log(data);
+import { useMessage } from 'naive-ui'
+const message = useMessage()
+const setSeriesData = async (data: any) => {
+    if (data.id) {
+        const res = await putSeriesDetailApi(data)
+        message.success(res.message)
     } else {
-        console.log('我是编辑');
-        console.log(data);
+        const res = await addSeriesApi(data)
+        message.success(res.message)
     }
+    console.log('lalalal');
     active.value = false
+    showDetail.value = false
+    // 刷新数据
+    getSeriesList()
 }
 // 页数
 const page = ref(1)
+const pageSize = ref(12)
+const total = ref(0)
 // 默认选中
 const defaultSelect = ref('all')
 // 类型选择
@@ -129,17 +133,24 @@ const setSelect = (key: string) => {
     defaultSelect.value = key
 }
 // 系列数据
-const seriesList = computed<Series[]>(() => {
-    const data = seriesData.filter(item => item.type === defaultSelect.value)
-    return data.length > 0 ? data : seriesData
-})
+const seriesList = ref<Series[]>()
+// 获取系列列表
+const getSeriesList = async () => {
+    const res = await getSeriesListApi({ page: page.value, pageSize: pageSize.value })
+    seriesList.value = res.data?.list
+    total.value = res.data!.total
+    console.log('我触发了');
+}
+getSeriesList()
 // 详情开关
 // 传递给详情页的数据
 const selectedItem = ref<SeriesDetail | null>(null)
 const showDetail = ref(false)
-const openDetail = (id: number) => {
+const openDetail = async (id: string) => {
+    const res = await getSeriesDetailApi(id)
+    selectedItem.value = res.data ?? null
     showDetail.value = true
-    selectedItem.value = seriesDetail.find(item => item.id === id) || null
+
 }
 </script>
 

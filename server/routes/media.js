@@ -5,26 +5,7 @@ const upload = require('../middlewares/upload')
 const media = require('../models/media')
 const fs = require('fs/promises')
 const path = require('path')
-/**
- * 1. 单独的封面图片上传接口
- * 请求类型: POST /media/upload
- * FormData 字段名: file
- */
-router.post('/upload', upload.single('file'), (req, res) => {
-    try {
-        if (!req.file) {
-            return res.json({ code: 400, message: '未收到图片文件' })
-        }
-        const coverUrl = `/uploads/${req.file.filename}`
-        res.json({
-            code: 200,
-            message: '封面上传成功',
-            data: { url: coverUrl }
-        })
-    } catch (err) {
-        res.status(500).json({ code: 500, message: '服务器错误', error: err.message })
-    }
-})
+
 // 添加作品
 router.post('/addDetail', token, async (req, res) => {
     try {
@@ -36,7 +17,7 @@ router.post('/addDetail', token, async (req, res) => {
         })
     } catch (error) {
         res.json({
-            code: 200,
+            code: 404,
             message: error.message
         })
     }
@@ -45,11 +26,12 @@ router.post('/addDetail', token, async (req, res) => {
 router.put('/updateMedia', token, async (req, res) => {
     try {
         const { id, ...newData } = req.body
+
         const msg = await media.updateOne({
             _id: id,
             userId: req.userId
-        }, { $set: { _id: req.id, ...newData } })
-        if (!msg) {
+        }, { $set: { ...newData } })
+        if (msg.matchedCount === 0) {
             return res.json({
                 code: 404,
                 message: '作品详情修改失败'

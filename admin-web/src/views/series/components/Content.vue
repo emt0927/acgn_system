@@ -4,7 +4,7 @@
        <div class=" overflow-hidden rounded-lg aspect-3/4 bg-muted relative">
         <span class="transition-opacity w-full h-full block ease-out duration-150"
             :class="true ? 'opacity-100' : 'opacity-0'">
-            <img src="@/assets/ldws.jpg" alt=""
+            <img :src="item.coverUrl" alt=""
                 class="w-full h-full  block object-cover transition duration-300 ease-in-out group-hover:scale-[1.04]">
         </span>
     </div>
