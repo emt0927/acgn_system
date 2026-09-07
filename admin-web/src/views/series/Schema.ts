@@ -1,6 +1,6 @@
 import type { SeriesDetail } from "@/types/acgn"
 // 详情类型展示
-type RenderType = 'url' | 'tags' | 'comment'
+type RenderType = 'url' | 'tags' | 'comment' | 'date'
 /**
  * 
  *系列相关类型
@@ -21,6 +21,8 @@ export interface SeriesFieldConfig {
     required?: boolean
     /** 非显示项 */
     editable?: boolean
+    hideInDetail?: boolean
+
 }
 export const SERIES_SCHEMAS: SeriesFieldConfig[] = [
     {
@@ -28,7 +30,8 @@ export const SERIES_SCHEMAS: SeriesFieldConfig[] = [
         key: 'coverUrl',
         type: 'url',
         formType: 'url',
-        required: true
+        required: true,
+        hideInDetail: true
     },
     {
         label: '标题',
@@ -56,6 +59,8 @@ export const SERIES_SCHEMAS: SeriesFieldConfig[] = [
     {
         label: '录入时间',
         key: 'updatedAt',
-        editable: false
+        type: 'date',
+        editable: false,
+        hideInDetail: true
     },
 ]

@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const token = require('../middlewares/token')
-const upload = require('../middlewares/upload')
 const media = require('../models/media')
 const fs = require('fs/promises')
 const path = require('path')
@@ -89,7 +88,7 @@ router.get('/getList', token, async (req, res) => {
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.pageSize) || 12
         const skip = (page - 1) * limit
-        const rawList = await media.find(filter).select('title coverUrl type subType status rating progress seriesId').sort({ createdAt: -1 }).skip(skip).limit(limit).lean()
+        const rawList = await media.find(filter).select('title coverUrl type subType status rating progress seriesId updatedAt').sort({ createdAt: -1 }).skip(skip).limit(limit).lean()
         const total = await media.countDocuments(filter)
         // 数据清洗
         const list = rawList.map(item => ({
@@ -101,7 +100,8 @@ router.get('/getList', token, async (req, res) => {
             status: item.status,
             rating: item.rating,
             progress: item.progress,
-            seriesId: item.series || null
+            seriesId: item.series || null,
+            updatedAt:item.updatedAt
         }))
         return res.json({
             code: 200,
@@ -125,7 +125,7 @@ router.get('/getDetail/:id', token, async (req, res) => {
         const detail = await media.findOne({
             _id: id,
             userId: req.userId
-        }).select('-userId -createdAt -__v').lean()
+        }).populate('series', 'title').select('-userId -createdAt -__v').lean()
         const { _id, ...cleanDetail } = detail
         if (!detail) {
             return res.json({

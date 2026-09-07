@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import type { AcgnType, MediaCardDetail } from '@/types/acgn';
 import { computed, ref, watch } from 'vue';
-import { FIELD_SCHEMAS, type FieldConfig } from '../Schema';
+import { FIELD_SCHEMAS, getSeriesOptions, type FieldConfig } from '../Schema';
 import type { FormInst, FormRules, UploadFileInfo } from 'naive-ui';
 import { uploadCoverUrlApi } from '@/api/upload';
 const formRef = ref<FormInst | null>(null)
@@ -76,9 +76,10 @@ const acgnType = ref<AcgnType>('anime')
 
 // 展示数据
 const dynamicForm = computed(() => {
-    const schema = FIELD_SCHEMAS[acgnType.value]
-    return schema.filter(item => item.editable !== false)
+    const schema = FIELD_SCHEMAS[acgnType.value] || []
+    return schema.filter(item => item.editable !== false).map(item => item.key === 'series' ? { ...item, options: seriesOptions.value } : item)
 }
+
 )
 // 录入值
 const oneForm = ref<Record<string, any>>({});
@@ -187,7 +188,12 @@ watch(() => props.active, (isOpen) => {
                 total: (detailProgress?.total) || 0
             }
         }
-        oneForm.value = { ...props.detail, progress: safeProgress }
+        // 重点
+        const rawSeries = props.detail.series
+        const safeSeries = (typeof rawSeries === 'object' && rawSeries !== null)
+            ? rawSeries._id
+            : rawSeries
+        oneForm.value = { ...props.detail, series: safeSeries, progress: safeProgress }
     } else {
         oneForm.value = createFrom(acgnType.value)
         oneForm.value.coverUrl = ''
@@ -196,8 +202,15 @@ watch(() => props.active, (isOpen) => {
         FileList.value = []
     }
 })
+//动态的系列数据
+const seriesOptions = ref()
+watch(acgnType, async (newType) => {
+    if (newType) {
+        seriesOptions.value = await getSeriesOptions(newType)
+    }
+}, { immediate: true })
 // 新增切换重置内容
-const handleTypeChange = (newType: AcgnType) => {
+const handleTypeChange = async (newType: AcgnType) => {
     oneForm.value = createFrom(newType)
     rawFile.value = null
     FileList.value = []

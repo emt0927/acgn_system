@@ -93,10 +93,16 @@ export interface MediaCardItem {
     progress: ProgressInfo
     /**关联的系列id */
     seriesId?: string | null
+    /**录入时间 */
+    updatedAt?: string
 }
 /*
 作品详情
 */
+export interface SeriesInfo {
+    _id: string,
+    title: string
+}
 export interface MediaCardDetail {
     /** 记录唯一ID */
     id: number
@@ -107,7 +113,7 @@ export interface MediaCardDetail {
     originalTitle?: string
 
     /** 🌟 所属系列 (如: 蔷薇少女) */
-    series?: string
+    series?: SeriesInfo
 
     /** 大类分类 (anime | manga | game | novel) */
     type: AcgnType
@@ -149,8 +155,6 @@ export interface MediaCardDetail {
 
     /** 最后修改时间 */
     updatedAt: string
-    /**关联的系列id */
-    seriesId?: number
 }
 
 /*

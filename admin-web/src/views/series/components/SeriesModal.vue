@@ -25,13 +25,17 @@
                         class: 'max-w-[220px] max-h-[220px] w-auto h-auto rounded-lg object-contain'
                     }" :src="detail?.[field.key]"></n-image>
                     <div class="flex" v-else-if="field.type === 'tags'">
-                            <n-tag type="success" v-for="item in detail?.[field.key]" class="mr-2">
-                                {{ item }}
-                            </n-tag>
+                        <n-tag type="success" v-for="item in detail?.[field.key]" class="mr-2">
+                            {{ item }}
+                        </n-tag>
                     </div>
                     <n-ellipsis style="max-width: 100%" :line-clamp="2" v-else-if="field.type === 'comment'">
                         {{ detail?.[field.key] }}
                     </n-ellipsis>
+                    <div v-else-if="field.type === 'date'">
+                        <n-time v-if="detail?.[field.key]" :time="new Date(detail[field.key] as string)"
+                            format="yyyy-MM-dd HH:mm" />
+                    </div>
                     <div v-else>{{ detail?.[field.key] }}</div>
                 </div>
             </div>

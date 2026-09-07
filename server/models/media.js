@@ -15,8 +15,8 @@ const mediaSchema = new mongoose.Schema({
         trim: true,
     },
     series: {
-        type: String,
-        default: ''
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'series'
     },
     type: {
         type: String,

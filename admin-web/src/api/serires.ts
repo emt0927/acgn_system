@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 import type { pageData } from "./media";
-import type { Series, SeriesDetail } from "@/types/acgn";
+import type { MediaCardItem, Series, SeriesDetail } from "@/types/acgn";
 // 添加系列
 export const addSeriesApi = (data: any) => {
     return request.post('/series/add', data)
@@ -21,4 +21,12 @@ export const getSeriesDetailApi = (id: string) => {
 //编辑系列
 export const putSeriesDetailApi = (data: any) => {
     return request.put('/series/updateSeries', data)
+}
+export interface SeriesWithMediaData {
+    seriesInfo: SeriesDetail
+    mediaList: MediaCardItem[]
+}
+// 获取系列相关联的作品
+export const getSeriesAndMediaApi = (id: string) => {
+    return request.get<SeriesWithMediaData>(`/series/addSeriresandMedia/${id}`)
 }

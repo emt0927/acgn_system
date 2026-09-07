@@ -2,7 +2,9 @@ const express = require('express')
 const router = express.Router()
 const token = require('../middlewares/token')
 const series = require('../models/series')
-
+const path = require('path')
+const fs = require('fs/promises')
+const media = require('../models/media')
 // 添加系列
 router.post('/add', token, async (req, res) => {
     try {
@@ -102,4 +104,63 @@ router.put('/updateSeries', token, async (req, res) => {
 })
 
 // 删除系列
+router.delete('/delete/:id', token, async (req, res) => {
+    try {
+        const { id } = req.params
+        const deletedSeries = await series.findOneAndDelete({
+            _id: id,
+            userId: req.userId
+        })
+        if (!deletedSeries) {
+            return res.json({
+                code: 404,
+                message: '系列删除失败'
+            })
+        }
+        if (deletedSeries.coverUrl) {
+            const absolutePath = path.join(process.cwd(), deletedSeries.coverUrl)
+            try {
+                await fs.unlink(absolutePath)
+                console.log(`[成功删除系列封面]: ${absolutePath}`)
+            } catch (error) {
+                console.warn(`[系列封面删除跳过/失败]: ${error.message}`)
+            }
+        }
+        res.json({
+            code: 200,
+            message: '系列删除成功'
+        })
+    } catch (error) {
+        return res.status(500).json({ code: 500, message: error.message })
+    }
+})
+// 获取系列关联的作品
+router.get('/addSeriresandMedia/:id', token, async (req, res) => {
+    try {
+        const { id } = req.params
+        const [seriesInfo, mediaList] = await Promise.all([
+            series.findOne({ _id: id, userId: req.userId }).lean(),media.find({
+                series: id, userId: req.userId
+            }).lean()
+        ])
+        console.log(seriesInfo, mediaList, '123123123123');
+        if (!seriesInfo) {
+            return res.json({ code: 404, message: '该系列不存在' })
+        }
+        res.json({
+            code: 200,
+            message: '系列相关联的作品获取成功',
+            data: {
+                seriesInfo,
+                mediaList
+            }
+        })
+    } catch (error) {
+        res.json({
+            code: 404,
+            message: '获取失败',
+        })
+    }
+
+})
 module.exports = router

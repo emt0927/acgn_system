@@ -13,8 +13,8 @@
             <div class="border-gray-200 border-b" v-for="field in activeSchema" :key="field.key">
                 <div class="flex py-3 px-6">
                     <span class="text-sm font-bold mr-3 w-16 shrink-0">{{ field.label }} :</span>
-                    <n-button v-if="field.type === 'link'" text type="primary">
-                        {{ item?.[field.key] }}
+                    <n-button v-if="field.type === 'link'" text type="primary" @click="getSeriesClick">
+                        {{ (item?.[field.key] as any).title }}
                     </n-button>
                     <n-image v-else-if="field.type === 'url'" :img-props="{
                         class: 'max-w-[220px] max-h-[220px] w-auto h-auto rounded-lg object-contain'
@@ -30,7 +30,8 @@
                         {{ progressText }}
                     </div>
                     <div v-else-if="field.type === 'date'">
-                        <n-time :time="new Date(item![field.key] as string)" format="yyyy-MM-dd HH:mm" />
+                        <n-time v-if="item?.[field.key]" :time="new Date(item[field.key] as string)"
+                            format="yyyy-MM-dd HH:mm" />
                     </div>
                     <div v-else>{{ item?.[field.key] }}</div>
                 </div>
@@ -42,7 +43,7 @@
 <script setup lang="ts">
 
 
-const emit = defineEmits(['update:show', 'open-edit', 'del-show'])
+const emit = defineEmits(['update:show', 'open-edit', 'del-show', 'open-seriesCard'])
 import type { AcgnStatus, MediaCardDetail } from '@/types/acgn';
 import { computed } from 'vue';
 import { FIELD_SCHEMAS } from '../Schema';
@@ -54,7 +55,11 @@ const visible = computed({
     get: () => props.show,
     set: (val) => emit('update:show', val)
 })
+// 点击系列的回显
+const getSeriesClick = () => {
+    emit('open-seriesCard', props.item?.series?._id)
 
+}
 // 编辑回显
 const handleEdit = () => {
     emit('open-edit', props.item)

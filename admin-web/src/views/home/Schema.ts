@@ -1,4 +1,4 @@
-import { seriesData } from "@/mock/acgnData";
+import { getSeriesListApi } from "@/api/serires";
 import { SUB_TYPE_OPTIONS_MAP, type AcgnType, type MediaCardDetail } from "@/types/acgn"
 
 // 四种渲染状态
@@ -82,27 +82,20 @@ const getCommonFooter = (type: AcgnType): FieldConfig[] => {
 }
 
 // 系列函数
-const getSeries = (type: AcgnType): FieldConfig => {
-    const schema = seriesData.filter(item => item.type === type)
-    const arr = schema.map(item => {
-        return {
-            label: item.title,
-            value: String(item.id)
-        }
-    })
-    return {
-        label: '系列',
-        key: 'series',
-        type: 'link',
-        formType: 'select',
-        options: arr
-    }
+export const getSeriesOptions = async (type: AcgnType) => {
+    const data = await getSeriesListApi()
+    const list = data.data?.list || []
+    return list.filter(item => item.type === type).map(item => ({
+        label: item.title,
+        value: item.id
+    }))
 }
+
 // 划分具体差异
 export const FIELD_SCHEMAS: Record<AcgnType, FieldConfig[]> = {
     anime: [
         ...COMMON_HEADER,
-        getSeries('anime'),
+        { label: '系列', key: 'series', type: 'link', formType: 'select', options: [] },
         { label: '类型', key: 'subType', required: true, formType: 'select', options: SUB_TYPE_OPTIONS_MAP['anime'] },
         { label: '原作', key: 'author' },
         { label: '导演', key: 'director' },
@@ -111,14 +104,14 @@ export const FIELD_SCHEMAS: Record<AcgnType, FieldConfig[]> = {
     ],
     game: [
         ...COMMON_HEADER,
-        getSeries('game'),
+        { label: '系列', key: 'series', type: 'link', formType: 'select', options: [] },
         { label: '类型', key: 'subType', required: true, formType: 'select', options: SUB_TYPE_OPTIONS_MAP['game'] },
         { label: '游戏公司', key: 'studio', required: true },
         ...getCommonFooter('game')
     ],
     manga: [
         ...COMMON_HEADER,
-        getSeries('manga'),
+        { label: '系列', key: 'series', type: 'link', formType: 'select', options: [] },
         { label: '类型', key: 'subType', required: true, formType: 'select', options: SUB_TYPE_OPTIONS_MAP['manga'] },
         { label: '原作', key: 'author' },
         { label: '出版社', key: 'studio' },
@@ -126,7 +119,7 @@ export const FIELD_SCHEMAS: Record<AcgnType, FieldConfig[]> = {
     ],
     novel: [
         ...COMMON_HEADER,
-        getSeries('novel'),
+        { label: '系列', key: 'series', type: 'link', formType: 'select', options: [] },
         { label: '类型', key: 'subType', required: true, formType: 'select', options: SUB_TYPE_OPTIONS_MAP['novel'] },
         { label: '原作', key: 'author' },
         { label: '出版社', key: 'studio' },

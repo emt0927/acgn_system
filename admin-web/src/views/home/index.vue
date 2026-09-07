@@ -39,7 +39,8 @@
             </MyDrawer>
             <!-- 详情展示框 -->
             <MyModal v-model:show="showDetail" :item="selectedItem" @open-edit="handleOpenEditFromDetail"
-                @del-show="DelItem" />
+                @del-show="DelItem" @open-seriesCard="openSeriesCard" />
+                <SeriesCard v-model:show="active" :data="seriesBox"></SeriesCard>
         </div>
     </MyCard>
 </template>
@@ -60,7 +61,6 @@ const mediaList = ref<MediaCardItem[]>()
 // 获取作品列表
 const getMediaList = async () => {
     const res = await getMediaListApi({ page: page.value, pageSize: pageSize.value })
-    console.log(res);
     mediaList.value = res.data?.list
     total.value = res.data!.total
 
@@ -74,6 +74,7 @@ const showDetail = ref(false)
 const handleOpenDetail = async (id: string) => {
     const res = await getMediaDetailApi(id)
     selectedItem.value = res.data
+
     showDetail.value = true
 }
 
@@ -87,13 +88,22 @@ const showDrawer = async () => {
     drawerState.value = true
 
 }
+// 打开系列关联盒子
+const active = ref(false)
+const seriesBox = ref<SeriesWithMediaData>()
+const openSeriesCard = async(id: string) => {
+    const res = await getSeriesAndMediaApi(id)
+    seriesBox.value = res.data
+    active.value = true
+}
 // 添加or编辑作品
 import { useMessage } from 'naive-ui'
+import SeriesCard from './components/SeriesCard.vue';
+import { getSeriesAndMediaApi, type SeriesWithMediaData } from '@/api/serires.ts';
 const message = useMessage()
 const setDetail = async (data: any) => {
     if (data.id) {
         const res = await putUpdateMediaApi(data)
-        console.log(data);
         message.success(res.message)
         showDetail.value = false
     } else {
