@@ -28,40 +28,75 @@
             @openSeriesItem="getSeriesItem">
         </SeriesModal>
         <SeriesDrawer v-model:show="active" :detail="seriesItem" @setSeriesData="setSeriesData"></SeriesDrawer>
-        <SeriesItemModal v-model:show="SeriesItemShow" :list="SeriesList" :id="SeriesId" @save="Save"></SeriesItemModal>
+        <SeriesItemModal v-model:show="SeriesItemShow" :list="SeriesList" @update-Series="updateSeries"
+            :newList="newSeriesList" :title="seriesTitle">
+        </SeriesItemModal>
     </MyCard>
 </template>
 
 <script setup lang="ts">
 import MyCard from '@/components/MyCard.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import Content from './components/Content.vue';
 import type { AcgnType, MediaCardItem, Series, SeriesDetail } from '@/types/acgn.ts';
 import SeriesModal from './components/SeriesModal.vue';
 import SeriesDrawer from './components/SeriesDrawer.vue';
 import SeriesItemModal from './components/SeriesItemModal.vue';
-import { addSeriesApi, getSeriesDetailApi, getSeriesListApi, putSeriesDetailApi } from '@/api/serires.ts';
-const SeriesId = ref<string | number | null>(null)
+import { addSeriesApi, getSeriesAndMediaApi, getSeriesDetailApi, getSeriesListApi, putSeriesDetailApi } from '@/api/serires.ts';
+// 当前的系列id
+const SeriesId = ref<string>('')
 // 获取向系列添加作品需要的数据
 const SeriesItemShow = ref(false)
-const SeriesList = ref<MediaCardItem[] | null>(null)
-const mediaList = ref<MediaCardItem[] | null>(null)
 
-const getSeriesItem = (id: any, type: AcgnType) => {
-    // option用的数据
-    const list = mediaList.value?.filter(item => {
-        const isSameType = item.type === type
-        const isCurrentOrNoSeries = !item.seriesId || String(item.seriesId) === String(id)
-        // 保留同类型并且将当前系列或的作品保留
-        return isSameType && isCurrentOrNoSeries
-    })
-    SeriesList.value = list!
+// 初始作品数据
+const mediaList = ref<MediaCardItem[] | null>(null)
+const MediaData = async () => {
+    const res = await getMediaListApi()
+    mediaList.value = res.data?.list ?? []
+}
+MediaData()
+const Type = ref<AcgnType | null>(null)
+// 该系列相关联的数据
+const newSeriesList = ref<MediaCardItem[] | null>(null)
+const seriesTitle = ref('')
+const getSeriesItem = async (id: string, type: AcgnType, title: string) => {
+    Type.value = type
     SeriesId.value = id
+    seriesTitle.value = title
+    // 系列相关联的作品
+    const res = await getSeriesAndMediaApi(id)
+    newSeriesList.value = res.data?.mediaList ?? []
     SeriesItemShow.value = true
 }
-const Save = (arr: (string | number)[]) => {
-    console.log('回传的数据', arr);
-    SeriesItemShow.value = false
+// 清洗后的作品数据
+const SeriesList = computed<MediaCardItem[]>(() => {
+    if (!Type.value) return []
+    return mediaList.value?.filter(item => {
+        // 过滤出同类型并且没有系列或者是其他系列的作品
+        const isSameType = item.type === Type.value
+        const isCurrentOrNoSeries = item.seriesId === '' || item.seriesId !== SeriesId.value
+        return isSameType && isCurrentOrNoSeries
+    }) ?? []
+})
+// 快速修改作品的类型
+const updateSeries = async (id: string, show: string) => {
+    if (show === 'add') {
+        // 添加类型
+        await updateMediaOrSreiesApi(id, SeriesId!.value)
+    } else {
+        // 取消类型
+        console.log(id);
+        await updateMediaOrSreiesApi(id, '')
+    }
+
+    await Promise.allSettled([MediaData(), SeriesorMediaData()])
+    message.success('修改成功')
+
+}
+// 系列关联的作品 
+const SeriesorMediaData = async () => {
+    const res = await getSeriesAndMediaApi(SeriesId.value)
+    newSeriesList.value = res.data?.mediaList ?? []
 }
 // 抽屉开关
 const active = ref(false)
@@ -79,6 +114,7 @@ const SeriesEdit = (detail: SeriesDetail) => {
 }
 // 抽屉组件传递回来的系列数据
 import { useMessage } from 'naive-ui'
+import { getMediaListApi, updateMediaOrSreiesApi } from '@/api/media.ts';
 const message = useMessage()
 const setSeriesData = async (data: any) => {
     if (data.id) {
@@ -88,7 +124,6 @@ const setSeriesData = async (data: any) => {
         const res = await addSeriesApi(data)
         message.success(res.message)
     }
-    console.log('lalalal');
     active.value = false
     showDetail.value = false
     // 刷新数据

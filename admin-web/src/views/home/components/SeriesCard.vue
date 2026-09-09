@@ -11,7 +11,7 @@
                                 alt="">
                         </div>
                         <div class="flex py-2" v-if="!item.hideInDetail">
-                            <span class="text-sm mr-3  shrink-0">{{ item.label }}:</span>
+                            <span class="text-sm mr-3  shrink-0 flex items-center">{{ item.label }}:</span>
                             <div v-if="item.type === 'tags'" class="flex flex-wrap">
                                 <n-tag type="success" v-for="tag in data?.seriesInfo?.[item.type]" class="m-1">
                                     {{ tag }}

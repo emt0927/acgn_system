@@ -139,11 +139,18 @@ router.get('/addSeriresandMedia/:id', token, async (req, res) => {
     try {
         const { id } = req.params
         const [seriesInfo, mediaList] = await Promise.all([
-            series.findOne({ _id: id, userId: req.userId }).lean(),media.find({
+            series.findOne({ _id: id, userId: req.userId }).lean(), media.find({
                 series: id, userId: req.userId
-            }).lean()
+            }).select('-userId -createdAt -__v').lean()
         ])
-        console.log(seriesInfo, mediaList, '123123123123');
+        //数据清洗
+        const formattedMediaList = mediaList.map(item => {
+            const { _id, ...test } = item
+            return {
+                id: _id,
+                ...test
+            }
+        })
         if (!seriesInfo) {
             return res.json({ code: 404, message: '该系列不存在' })
         }
@@ -152,7 +159,7 @@ router.get('/addSeriresandMedia/:id', token, async (req, res) => {
             message: '系列相关联的作品获取成功',
             data: {
                 seriesInfo,
-                mediaList
+                mediaList: formattedMediaList
             }
         })
     } catch (error) {

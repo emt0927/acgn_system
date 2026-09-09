@@ -61,7 +61,7 @@ const visible = computed({
 })
 // 向系列里添加作品
 const setSeriesItem = () => {
-    emit('open-SeriesItem', props.detail?.id, props.detail?.type)
+    emit('open-SeriesItem', props.detail?.id, props.detail?.type, props.detail?.title)
 }
 // 编辑回显
 const handleEdit = () => {

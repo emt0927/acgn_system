@@ -194,6 +194,7 @@ watch(() => props.active, (isOpen) => {
             ? rawSeries._id
             : rawSeries
         oneForm.value = { ...props.detail, series: safeSeries, progress: safeProgress }
+        console.log(oneForm.value);
     } else {
         oneForm.value = createFrom(acgnType.value)
         oneForm.value.coverUrl = ''

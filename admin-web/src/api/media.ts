@@ -33,3 +33,7 @@ export const putUpdateMediaApi = (data: any) => {
 export const deleteMediaApi = (id: string) => {
     return request.delete(`/media/delete/${id}`)
 }
+// 修改作品的系列
+export const updateMediaOrSreiesApi = (id: string, seriesId?: string) => {
+    return request.put(`/media/updateMediaOrSreies/${id}`, { seriesId })
+}
