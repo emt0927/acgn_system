@@ -35,12 +35,14 @@
                     :item-count="total" />
             </div>
             <!-- 抽屉组件 -->
-            <MyDrawer v-model:active="drawerState" :detail="drawerDetail" @setDetail="setDetail">
+            <MyDrawer v-model:active="drawerState" :detail="drawerDetail" @setDetail="setDetail"
+                @getBangumiList="getBangumiList">
             </MyDrawer>
             <!-- 详情展示框 -->
             <MyModal v-model:show="showDetail" :item="selectedItem" @open-edit="handleOpenEditFromDetail"
                 @del-show="DelItem" @open-seriesCard="openSeriesCard" />
-                <SeriesCard v-model:show="active" :data="seriesBox"></SeriesCard>
+            <SeriesCard v-model:show="active" :data="seriesBox"></SeriesCard>
+            <BangumuList v-model:show="bangumiListState" :type="bangumitype"></BangumuList>
         </div>
     </MyCard>
 </template>
@@ -53,6 +55,14 @@ import MyDrawer from './components/MyDrawer.vue';
 import MyModal from './components/MyModal.vue';
 import type { MediaCardDetail, MediaCardItem } from '@/types/acgn.ts';
 import { addMediaApi, deleteMediaApi, getMediaDetailApi, getMediaListApi, putUpdateMediaApi } from '@/api/media.ts';
+// bangumi列表状态
+const bangumiListState = ref(false)
+const bangumitype = ref('')
+const getBangumiList = (type: string) => {
+    console.log(type);
+    bangumitype.value = type
+    bangumiListState.value = true
+}
 // 分页
 const page = ref(1)
 const pageSize = ref(12)
@@ -91,7 +101,7 @@ const showDrawer = async () => {
 // 打开系列关联盒子
 const active = ref(false)
 const seriesBox = ref<SeriesWithMediaData>()
-const openSeriesCard = async(id: string) => {
+const openSeriesCard = async (id: string) => {
     const res = await getSeriesAndMediaApi(id)
     seriesBox.value = res.data
     active.value = true
@@ -100,6 +110,7 @@ const openSeriesCard = async(id: string) => {
 import { useMessage } from 'naive-ui'
 import SeriesCard from './components/SeriesCard.vue';
 import { getSeriesAndMediaApi, type SeriesWithMediaData } from '@/api/serires.ts';
+import BangumuList from '@/components/BangumuList.vue';
 const message = useMessage()
 const setDetail = async (data: any) => {
     if (data.id) {

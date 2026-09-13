@@ -5,12 +5,12 @@ const userStore = useUserStore()
 </script>
 
 <template>
-    <n-config-provider :locale="zhCN" :date-locale="dateZhCN" class="config-provider" :theme="userStore.isDark ? darkTheme : null">
-        <n-message-provider>
+    <n-config-provider :locale="zhCN" :date-locale="dateZhCN" class="config-provider"
+        :theme="userStore.isDark ? darkTheme : null">
+        <n-message-provider :max="3">
             <router-view></router-view>
         </n-message-provider>
     </n-config-provider>
-
 </template>
 <style scoped>
 .config-provider {

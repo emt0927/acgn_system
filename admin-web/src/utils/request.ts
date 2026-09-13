@@ -5,12 +5,20 @@ import { createDiscreteApi } from "naive-ui";
 import { ref } from "vue";
 const { message } = createDiscreteApi(['message'])
 import router from "@/router";
+import { hideLoading, showLoading } from "./loading";
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    noLoading?: boolean
+  }
+  export interface InternalAxiosRequestConfig {
+    noLoading?: boolean
+  }
+}
 // 1. 创建实例
 const req = axios.create({
   baseURL: 'http://localhost:3000',
-  timeout: 5000
+  timeout: 15000
 });
-
 // 2. 请求拦截器
 req.interceptors.request.use(function (config) {
   // 引入user仓库
@@ -19,8 +27,14 @@ req.interceptors.request.use(function (config) {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  if (!config.noLoading) {
+    showLoading()
+  }
   return config;
 }, function (error) {
+  if (!error.config?.noLoading) {
+    hideLoading()
+  }
   return Promise.reject(error);
 });
 // 无感刷新token
@@ -30,6 +44,10 @@ const isRefreshing = ref(false)
 const retryQueue = ref<((token: string) => void)[]>([])
 // 3. 响应拦截器（脱皮：把 response.data 剥出来）
 req.interceptors.response.use(async function (response) {
+  // 接口成功返回，减少计数
+  if (!response.config.noLoading) {
+    hideLoading()
+  }
   const res = response.data;
   const config = response.config
   const userStore = useUserStore()
@@ -82,6 +100,9 @@ req.interceptors.response.use(async function (response) {
   }
   return response.data;
 }, async function (error) {
+  if (error.config && !error.config.noLoading) {
+    hideLoading()
+  }
   const msg = error.response?.data?.message || error.message || '网络或服务器错误'
   message.error(msg)
   return Promise.reject(new Error(msg))

@@ -18,6 +18,11 @@
             </n-radio-group>
             <n-form ref="formRef" :model="oneForm" :style="{ maxWidth: '640px' }" label-placement="left"
                 label-width="auto" :key="acgnType" :rules="rules" require-mark-placement="left">
+                <n-form-item label="快速导入">
+                    <n-button text target="_blank" type="primary" @click="emit('getBangumiList',acgnType)">
+                        从bangumi导入
+                    </n-button>
+                </n-form-item>
                 <n-form-item v-for="item in dynamicForm" :key="item.key" :label="item.label" :path="getItemPath(item)">
                     <n-input v-model:value="oneForm[item.key]" v-if="item.formType === 'textarea'" type="textarea"
                         :rows="3" />
@@ -66,7 +71,7 @@ const props = defineProps<{
     active: boolean,
     detail: MediaCardDetail | null
 }>()
-const emit = defineEmits(['update:active', 'addDetail', 'setDetail'])
+const emit = defineEmits(['update:active', 'addDetail', 'setDetail', 'getBangumiList'])
 const visible = computed({
     get: () => props.active,
     set: value => emit('update:active', value)

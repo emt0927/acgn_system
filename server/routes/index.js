@@ -9,9 +9,12 @@ const mediaRouter = require('./media')
 const seriesRouter = require('./series')
 // 上传图片
 const uploadRouter = require('./upload')
+// bangumi相关
+const bangumiRouter = require('./bangumi')
 router.use('/auth', authRouter)
 router.use('/media', mediaRouter)
 router.use('/series', seriesRouter)
 router.use('/upload', uploadRouter)
+router.use('/bangumi', bangumiRouter)
 
 module.exports = router
