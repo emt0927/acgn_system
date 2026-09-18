@@ -99,7 +99,6 @@ watch(active, (isOpen) => {
     if (!isOpen) return
     if (props.detail) {
         oneForm.value = { ...props.detail }
-        console.log(oneForm.value);
         // 编辑图片
         FileList.value = [{
             id: 'existing.cover',

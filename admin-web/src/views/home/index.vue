@@ -59,7 +59,6 @@ import { addMediaApi, deleteMediaApi, getMediaDetailApi, getMediaListApi, putUpd
 const bangumiListState = ref(false)
 const bangumitype = ref('')
 const getBangumiList = (type: string) => {
-    console.log(type);
     bangumitype.value = type
     bangumiListState.value = true
 }
@@ -82,7 +81,7 @@ const getBgmMedia = async (id: any) => {
         rawfile.value = await urlToFile(res.data.coverUrl)
         detail.value = { ...res.data, rawfile: rawfile.value }
         importDetail.value = detail.value
-         bangumiListState.value = false
+        bangumiListState.value = false
     }
 }
 // 分页
@@ -133,6 +132,7 @@ import SeriesCard from './components/SeriesCard.vue';
 import { getSeriesAndMediaApi, type SeriesWithMediaData } from '@/api/serires.ts';
 import BangumuList from '@/components/BangumuList.vue';
 import { getBangumiDetailApi } from '@/api/bangumi.ts';
+import { trackRecordApi } from '@/api/record.ts';
 const message = useMessage()
 const setDetail = async (data: any) => {
     if (data.id) {
@@ -141,9 +141,10 @@ const setDetail = async (data: any) => {
         showDetail.value = false
     } else {
         console.log('我是添加');
-        console.log(data);
         const res = await addMediaApi(data)
         message.success(res.message)
+        // 记录
+        await trackRecordApi('midia', data.title, 'add')
     }
     drawerState.value = false
     getMediaList()
@@ -156,11 +157,15 @@ const handleOpenEditFromDetail = (detail: MediaCardDetail) => {
     drawerState.value = true
 }
 // 删除作品
-const DelItem = async (id: string) => {
+const DelItem = async (id: string, title: string) => {
     const res = await deleteMediaApi(id)
     message.success(res.message)
     showDetail.value = false
-    getMediaList()
+    await getMediaList()
+    // 记录
+    if (res) {
+        await trackRecordApi('midia', title, 'clear')
+    }
 }
 
 // 排序选择

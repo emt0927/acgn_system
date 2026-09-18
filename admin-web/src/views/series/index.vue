@@ -25,7 +25,7 @@
             </div>
         </div>
         <SeriesModal v-model:show="showDetail" :detail="selectedItem" @open-edit="SeriesEdit"
-            @openSeriesItem="getSeriesItem">
+            @openSeriesItem="getSeriesItem" @del-show="SeriesDel">
         </SeriesModal>
         <SeriesDrawer v-model:show="active" :detail="seriesItem" @setSeriesData="setSeriesData"
             @getBangumiList="getBangumiList" :importDetail="importDetail">
@@ -39,13 +39,13 @@
 
 <script setup lang="ts">
 import MyCard from '@/components/MyCard.vue';
-import { computed, ref } from 'vue';
+import { computed, h, ref } from 'vue';
 import Content from './components/Content.vue';
 import type { AcgnType, importDetailType, MediaCardItem, Series, SeriesDetail } from '@/types/acgn.ts';
 import SeriesModal from './components/SeriesModal.vue';
 import SeriesDrawer from './components/SeriesDrawer.vue';
 import SeriesItemModal from './components/SeriesItemModal.vue';
-import { addSeriesApi, getSeriesAndMediaApi, getSeriesDetailApi, getSeriesListApi, putSeriesDetailApi } from '@/api/serires.ts';
+import { addSeriesApi, deleteSeriesApi, getSeriesAndMediaApi, getSeriesDetailApi, getSeriesListApi, putSeriesDetailApi } from '@/api/serires.ts';
 // bangumi列表状态
 const bangumiListState = ref(false)
 const bangumitype = ref('')
@@ -111,6 +111,7 @@ const SeriesList = computed<MediaCardItem[]>(() => {
 })
 // 快速修改作品的类型
 const updateSeries = async (id: string, show: string) => {
+
     if (show === 'add') {
         // 添加类型
         await updateMediaOrSreiesApi(id, SeriesId!.value)
@@ -128,6 +129,7 @@ const updateSeries = async (id: string, show: string) => {
 const SeriesorMediaData = async () => {
     const res = await getSeriesAndMediaApi(SeriesId.value)
     newSeriesList.value = res.data?.mediaList ?? []
+    console.log(res.data?.mediaList, 123123231);
 }
 // 抽屉开关
 const active = ref(false)
@@ -143,12 +145,50 @@ const SeriesEdit = (detail: SeriesDetail) => {
     seriesItem.value = detail
     active.value = true
 }
+import { useMessage, useDialog } from 'naive-ui'
+const message = useMessage()
+const dialog = useDialog()
+// 删除系列
+const SeriesDel = async (id: string, title: string) => {
+    const res = await getSeriesAndMediaApi(id)
+    let del = null
+    if ((res.data?.mediaList.length as number) > 0) {
+        dialog.warning({
+            title: '警告',
+            content: () => {
+                const list = res.data?.mediaList || []
+                const mediaNames = list.map((item: any) => typeof item === 'string' ? item : (item.title || item.name)).join('、')
+                return h('div', null, [h('p', { style: 'margin-bottom: 8px;' }, '该系列存在关联作品，强行删除后以下作品将失去所属系列：'),
+                h('div', {
+                    style: 'color: #d03050; font-weight: bold; background: rgba(208, 48, 80, 0.08); padding: 8px 12px; border-radius: 4px; word-break: break-all;'
+                }, mediaNames || '无关联作品信息')])
+            },
+            positiveText: '确定',
+            negativeText: '不确定',
+            draggable: true,
+            onPositiveClick: async () => {
+                del = await deleteSeriesApi(id)
+                message.success(del.message)
+                showDetail.value = false
+                await getSeriesList()
+            },
+        })
+    } else {
+        del = await deleteSeriesApi(id)
+        message.success(del.message)
+        showDetail.value = false
+        await getSeriesList()
+    }
+    if (del) {
+        // 记录
+        await trackRecordApi('series', title, 'clear')
+    }
+}
 // 抽屉组件传递回来的系列数据
-import { useMessage } from 'naive-ui'
 import { getMediaListApi, updateMediaOrSreiesApi } from '@/api/media.ts';
 import BangumuList from '@/components/BangumuList.vue';
 import { getBangumiDetailApi } from '@/api/bangumi.ts';
-const message = useMessage()
+import { trackRecordApi } from '@/api/record.ts';
 const setSeriesData = async (data: any) => {
     if (data.id) {
         const res = await putSeriesDetailApi(data)
@@ -156,6 +196,9 @@ const setSeriesData = async (data: any) => {
     } else {
         const res = await addSeriesApi(data)
         message.success(res.message)
+        // 记录
+        await trackRecordApi('series', data.title, 'add')
+
     }
     active.value = false
     showDetail.value = false

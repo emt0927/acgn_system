@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NConfigProvider, NMessageProvider, zhCN, dateZhCN, darkTheme } from 'naive-ui'
+import { NConfigProvider, NDialogProvider, NMessageProvider, zhCN, dateZhCN, darkTheme } from 'naive-ui'
 import { useUserStore } from './store';
 const userStore = useUserStore()
 </script>
@@ -8,7 +8,9 @@ const userStore = useUserStore()
     <n-config-provider :locale="zhCN" :date-locale="dateZhCN" class="config-provider"
         :theme="userStore.isDark ? darkTheme : null">
         <n-message-provider :max="3">
-            <router-view></router-view>
+            <n-dialog-provider>
+                <router-view></router-view>
+            </n-dialog-provider>
         </n-message-provider>
     </n-config-provider>
 </template>

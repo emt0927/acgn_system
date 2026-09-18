@@ -200,7 +200,6 @@ watch(() => props.active, (isOpen) => {
             ? rawSeries._id
             : rawSeries
         oneForm.value = { ...props.detail, series: safeSeries, progress: safeProgress }
-        console.log(oneForm.value);
     } else {
         oneForm.value = createFrom(acgnType.value)
         oneForm.value.coverUrl = ''
@@ -211,7 +210,6 @@ watch(() => props.active, (isOpen) => {
 })
 // 快速导入
 watch(() => props.importDetail, (newValue) => {
-    console.log(newValue);
     if (newValue) {
         const {  rawfile, totalEpisodes, ...detail } = newValue
         if (totalEpisodes) {

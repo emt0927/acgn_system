@@ -41,8 +41,6 @@ router.get('/searchList', async (req, res) => {
         })
         // 数据清洗
         const rawList = response.data.data || []
-        console.log(rawList, 'rawList');
-
         if (rawList.length === 0) {
             return res.json({
                 code: 200,
@@ -122,7 +120,14 @@ const cleanBangumiData = (raw, category) => {
 router.get('/detail', async (req, res) => {
     try {
         const { id, type = 'anime' } = req.query
-        const response = await axios.get(`https://api.bgm.tv/v0/subjects/${id}`)
+        const response = await axios.get(`https://api.bgm.tv/v0/subjects/${id}`, {
+            headers: {
+                'User-Agent': 'acgn_system/1.0 (https://github.com/emt0927/acgn_system)'
+            },
+            timeout: 8000
+        })
+        console.log(123);
+        console.log(response, 'w s dsdsadasdsadsad');
         const rawList = response.data || []
         const detail = cleanBangumiData(rawList, type) || []
         return res.json({

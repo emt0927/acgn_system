@@ -66,7 +66,7 @@ const handleEdit = () => {
 }
 // 删除回显
 const handleDel = () => {
-    emit('del-show', props.item?.id)
+    emit('del-show', props.item?.id, props.item?.title)
 }
 
 // 进度展示

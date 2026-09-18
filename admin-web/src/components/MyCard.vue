@@ -8,7 +8,7 @@
         <div class="header">
             <slot name="cardTab"> #header-extra</slot>
         </div>
-        <div class="action bg-action">
+        <div class="action bg-action" v-if="$slots.action">
             <slot name="action">@action</slot>
         </div>
         <div class="card-body">

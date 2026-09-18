@@ -69,7 +69,7 @@ const handleEdit = () => {
 }
 // 删除回显
 const handleDel = () => {
-    emit('del-show', props.detail?.id)
+    emit('del-show', props.detail?.id, props.detail?.title)
 }
 // 校验
 const hasValue = (val: any) => {

@@ -30,3 +30,7 @@ export interface SeriesWithMediaData {
 export const getSeriesAndMediaApi = (id: string) => {
     return request.get<SeriesWithMediaData>(`/series/addSeriresandMedia/${id}`)
 }
+// 删除系列
+export const deleteSeriesApi = (id: string) => {
+    return request.delete(`series/delete/${id}`)
+}

@@ -11,10 +11,12 @@ const seriesRouter = require('./series')
 const uploadRouter = require('./upload')
 // bangumi相关
 const bangumiRouter = require('./bangumi')
+// 记录相关
+const recordRouter = require('./record')
 router.use('/auth', authRouter)
 router.use('/media', mediaRouter)
 router.use('/series', seriesRouter)
 router.use('/upload', uploadRouter)
 router.use('/bangumi', bangumiRouter)
-
+router.use('/record', recordRouter)
 module.exports = router
