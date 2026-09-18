@@ -36,13 +36,13 @@
             </div>
             <!-- 抽屉组件 -->
             <MyDrawer v-model:active="drawerState" :detail="drawerDetail" @setDetail="setDetail"
-                @getBangumiList="getBangumiList">
+                @getBangumiList="getBangumiList" :importDetail="importDetail">
             </MyDrawer>
             <!-- 详情展示框 -->
             <MyModal v-model:show="showDetail" :item="selectedItem" @open-edit="handleOpenEditFromDetail"
                 @del-show="DelItem" @open-seriesCard="openSeriesCard" />
             <SeriesCard v-model:show="active" :data="seriesBox"></SeriesCard>
-            <BangumuList v-model:show="bangumiListState" :type="bangumitype"></BangumuList>
+            <BangumuList v-model:show="bangumiListState" :type="bangumitype" @getBgmMedia="getBgmMedia"></BangumuList>
         </div>
     </MyCard>
 </template>
@@ -53,7 +53,7 @@ import { computed, ref } from 'vue';
 import ContentCard from './components/ContentCard.vue';
 import MyDrawer from './components/MyDrawer.vue';
 import MyModal from './components/MyModal.vue';
-import type { MediaCardDetail, MediaCardItem } from '@/types/acgn.ts';
+import type { importDetailType, MediaCardDetail, MediaCardItem } from '@/types/acgn.ts';
 import { addMediaApi, deleteMediaApi, getMediaDetailApi, getMediaListApi, putUpdateMediaApi } from '@/api/media.ts';
 // bangumi列表状态
 const bangumiListState = ref(false)
@@ -62,6 +62,28 @@ const getBangumiList = (type: string) => {
     console.log(type);
     bangumitype.value = type
     bangumiListState.value = true
+}
+
+// 拿到bgm回显的数据
+const rawfile = ref()
+const detail = ref()
+// url转file
+const urlToFile = async (url: string, fileName = 'cover.jpg'): Promise<File> => {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    return new File([blob], fileName, { type: blob.type || 'image/jpeg' })
+}
+const importDetail = ref<importDetailType | null>(null)
+const getBgmMedia = async (id: any) => {
+    // bangumi获取到的详情数据 用于抽屉回显
+    console.log(bangumitype.value, id);
+    const res = await getBangumiDetailApi({ id, type: bangumitype.value })
+    if (res.data.coverUrl) {
+        rawfile.value = await urlToFile(res.data.coverUrl)
+        detail.value = { ...res.data, rawfile: rawfile.value }
+        importDetail.value = detail.value
+         bangumiListState.value = false
+    }
 }
 // 分页
 const page = ref(1)
@@ -84,7 +106,6 @@ const showDetail = ref(false)
 const handleOpenDetail = async (id: string) => {
     const res = await getMediaDetailApi(id)
     selectedItem.value = res.data
-
     showDetail.value = true
 }
 
@@ -111,6 +132,7 @@ import { useMessage } from 'naive-ui'
 import SeriesCard from './components/SeriesCard.vue';
 import { getSeriesAndMediaApi, type SeriesWithMediaData } from '@/api/serires.ts';
 import BangumuList from '@/components/BangumuList.vue';
+import { getBangumiDetailApi } from '@/api/bangumi.ts';
 const message = useMessage()
 const setDetail = async (data: any) => {
     if (data.id) {

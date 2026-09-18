@@ -113,7 +113,7 @@ export const FIELD_SCHEMAS: Record<AcgnType, FieldConfig[]> = {
         ...COMMON_HEADER,
         { label: '系列', key: 'series', type: 'link', formType: 'select', options: [] },
         { label: '类型', key: 'subType', required: true, formType: 'select', options: SUB_TYPE_OPTIONS_MAP['manga'] },
-        { label: '原作', key: 'author' },
+        { label: '作者', key: 'author' },
         { label: '出版社', key: 'studio' },
         ...getCommonFooter('manga')
     ],
@@ -121,7 +121,7 @@ export const FIELD_SCHEMAS: Record<AcgnType, FieldConfig[]> = {
         ...COMMON_HEADER,
         { label: '系列', key: 'series', type: 'link', formType: 'select', options: [] },
         { label: '类型', key: 'subType', required: true, formType: 'select', options: SUB_TYPE_OPTIONS_MAP['novel'] },
-        { label: '原作', key: 'author' },
+        { label: '作者', key: 'author' },
         { label: '出版社', key: 'studio' },
         ...getCommonFooter('novel')
     ],

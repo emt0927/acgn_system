@@ -19,7 +19,7 @@
             <n-form ref="formRef" :model="oneForm" :style="{ maxWidth: '640px' }" label-placement="left"
                 label-width="auto" :key="acgnType" :rules="rules" require-mark-placement="left">
                 <n-form-item label="快速导入">
-                    <n-button text target="_blank" type="primary" @click="emit('getBangumiList',acgnType)">
+                    <n-button text target="_blank" type="primary" @click="emit('getBangumiList', acgnType)">
                         从bangumi导入
                     </n-button>
                 </n-form-item>
@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import type { AcgnType, MediaCardDetail } from '@/types/acgn';
+import type { AcgnType, importDetailType, MediaCardDetail } from '@/types/acgn';
 import { computed, ref, watch } from 'vue';
 import { FIELD_SCHEMAS, getSeriesOptions, type FieldConfig } from '../Schema';
 import type { FormInst, FormRules, UploadFileInfo } from 'naive-ui';
@@ -69,7 +69,8 @@ import { uploadCoverUrlApi } from '@/api/upload';
 const formRef = ref<FormInst | null>(null)
 const props = defineProps<{
     active: boolean,
-    detail: MediaCardDetail | null
+    detail: MediaCardDetail | null,
+    importDetail: importDetailType | null
 }>()
 const emit = defineEmits(['update:active', 'addDetail', 'setDetail', 'getBangumiList'])
 const visible = computed({
@@ -208,6 +209,29 @@ watch(() => props.active, (isOpen) => {
         FileList.value = []
     }
 })
+// 快速导入
+watch(() => props.importDetail, (newValue) => {
+    console.log(newValue);
+    if (newValue) {
+        const {  rawfile, totalEpisodes, ...detail } = newValue
+        if (totalEpisodes) {
+            // 总集数
+            oneForm.value.progress.total = totalEpisodes
+        }
+            // 换封面图
+            FileList.value = [
+                {
+                    id: 'existing.cover',
+                    name: '封面图',
+                    status: 'finished',
+                    url: newValue.coverUrl
+                }
+            ]
+        // 封面图的file对象
+        rawFile.value = rawfile ?? null
+        oneForm.value = { ...oneForm.value, ...detail }
+    }
+}, { deep: true, immediate: true })
 //动态的系列数据
 const seriesOptions = ref()
 watch(acgnType, async (newType) => {

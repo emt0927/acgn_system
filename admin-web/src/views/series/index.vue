@@ -27,10 +27,13 @@
         <SeriesModal v-model:show="showDetail" :detail="selectedItem" @open-edit="SeriesEdit"
             @openSeriesItem="getSeriesItem">
         </SeriesModal>
-        <SeriesDrawer v-model:show="active" :detail="seriesItem" @setSeriesData="setSeriesData"></SeriesDrawer>
+        <SeriesDrawer v-model:show="active" :detail="seriesItem" @setSeriesData="setSeriesData"
+            @getBangumiList="getBangumiList" :importDetail="importDetail">
+        </SeriesDrawer>
         <SeriesItemModal v-model:show="SeriesItemShow" :list="SeriesList" @update-Series="updateSeries"
             :newList="newSeriesList" :title="seriesTitle">
         </SeriesItemModal>
+        <BangumuList v-model:show="bangumiListState" :type="bangumitype" @getBgmMedia="getBgmMedia"></BangumuList>
     </MyCard>
 </template>
 
@@ -38,16 +41,44 @@
 import MyCard from '@/components/MyCard.vue';
 import { computed, ref } from 'vue';
 import Content from './components/Content.vue';
-import type { AcgnType, MediaCardItem, Series, SeriesDetail } from '@/types/acgn.ts';
+import type { AcgnType, importDetailType, MediaCardItem, Series, SeriesDetail } from '@/types/acgn.ts';
 import SeriesModal from './components/SeriesModal.vue';
 import SeriesDrawer from './components/SeriesDrawer.vue';
 import SeriesItemModal from './components/SeriesItemModal.vue';
 import { addSeriesApi, getSeriesAndMediaApi, getSeriesDetailApi, getSeriesListApi, putSeriesDetailApi } from '@/api/serires.ts';
+// bangumi列表状态
+const bangumiListState = ref(false)
+const bangumitype = ref('')
+const getBangumiList = (type: string) => {
+    console.log(type);
+    bangumitype.value = type
+    bangumiListState.value = true
+}
+// 拿到bgm回显的数据
+const rawfile = ref()
+const detail = ref()
+// url转file
+const urlToFile = async (url: string, fileName = 'cover.jpg'): Promise<File> => {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    return new File([blob], fileName, { type: blob.type || 'image/jpeg' })
+}
+const importDetail = ref<importDetailType | null>(null)
+const getBgmMedia = async (id: any) => {
+    // bangumi获取到的详情数据 用于抽屉回显
+    const res = await getBangumiDetailApi({ id, type: 'series' })
+    if (res.data.coverUrl) {
+        rawfile.value = await urlToFile(res.data.coverUrl)
+        detail.value = { ...res.data, rawfile: rawfile.value }
+        importDetail.value = detail.value
+        bangumiListState.value = false
+    }
+}
+
 // 当前的系列id
 const SeriesId = ref<string>('')
 // 获取向系列添加作品需要的数据
 const SeriesItemShow = ref(false)
-
 // 初始作品数据
 const mediaList = ref<MediaCardItem[] | null>(null)
 const MediaData = async () => {
@@ -115,6 +146,8 @@ const SeriesEdit = (detail: SeriesDetail) => {
 // 抽屉组件传递回来的系列数据
 import { useMessage } from 'naive-ui'
 import { getMediaListApi, updateMediaOrSreiesApi } from '@/api/media.ts';
+import BangumuList from '@/components/BangumuList.vue';
+import { getBangumiDetailApi } from '@/api/bangumi.ts';
 const message = useMessage()
 const setSeriesData = async (data: any) => {
     if (data.id) {

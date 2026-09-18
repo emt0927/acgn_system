@@ -16,38 +16,34 @@
                     <n-empty description="暂无数据">
                     </n-empty>
                 </div>
-                <template v-else>
-                    <div class="max-h-130 overflow-auto">
-                        <div class="flex mb-5" v-for="item in list" :key="item.id">
-                            <div
-                                class="w-20 h-30 bg-white border border-gray-200 shadow-md p-0.75 shrink-0 cursor-pointer hover:border-sky-500 hover:shadow-md">
-                                <img :src="item.coverUrl" alt="" class="w-full h-full object-cover">
+                <div class="max-h-130 overflow-auto" v-else>
+                    <div class="flex mb-5" v-for="item in list" :key="item.id">
+                        <div class="w-20 h-30 bg-white border border-gray-200 shadow-md p-0.75 shrink-0 cursor-pointer hover:border-sky-500 hover:shadow-md"
+                            @click="getBgmMedia(item.id)">
+                            <img :src="item.coverUrl" alt="" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1 flex-col min-w-0 px-2.5">
+                            <div class="flex items-center">
+                                <div class="mr-1">
+                                    <n-button text type="info" @click="getBgmMedia(item.id)">
+                                        {{ item.title }}
+                                    </n-button>
+                                </div>
+                                <span class="text-[#999] text-[10px] truncate block">{{ item.originalTitle }}</span>
                             </div>
-                            <div class="flex-1 flex-col min-w-0 px-2.5">
-                                <div class="flex items-center">
-                                    <div class="mr-1">
-                                        <n-button text type="info">
-                                            {{ item.title }}
-                                        </n-button>
-                                    </div>
-                                    <span class="text-[#999] text-[10px] truncate block">{{ item.originalTitle }}</span>
-                                </div>
-                                <div class="pt-2.5 flex text-[#666] text-[12px]">
-                                    {{ item.date }}/ {{ item.director }}/ {{ item.originalWork }}/ {{
-                                        item.characterDesign }}
-                                </div>
+                            <div class="pt-2.5 flex text-[#666] text-[12px]">
+                                {{ item.date }}/ {{ item.director }}/ {{ item.originalWork }}/ {{
+                                    item.characterDesign }}
                             </div>
                         </div>
                     </div>
-                </template>
+                </div>
             </Transition>
         </div>
     </n-modal>
 </template>
 
 <script setup lang="ts">
-import { useMessage } from 'naive-ui'
-const message = useMessage()
 const loading = ref(false)
 import { getBangumiSearchListApi } from '@/api/bangumi';
 import { ref } from 'vue';
@@ -55,6 +51,7 @@ const searchValue = ref('')
 const props = defineProps<{
     type: string
 }>()
+const emit = defineEmits(['getBgmMedia'])
 // 弹窗开关
 const showModal = defineModel('show', { required: true })
 export interface bgmSearchListType {
@@ -80,12 +77,21 @@ const list = ref<bgmSearchListType[]>([])
 // 搜索 
 const handleSearch = async () => {
     loading.value = true
-    const res = await getBangumiSearchListApi({ keyword: searchValue.value, type: props.type })
-    loading.value = false
-    list.value = res.data ?? []
-    console.log(list.value);
+    try {
+        const res = await getBangumiSearchListApi({ keyword: searchValue.value, type: props.type })
+        loading.value = false
+        list.value = res.data ?? []
+        console.log(list.value);
+    } catch (error) {
+        loading.value = false
+    }
+
 }
 
+// 回显id
+const getBgmMedia = (id: any) => {
+    emit('getBgmMedia', id)
+}
 </script>
 
 <style scoped>

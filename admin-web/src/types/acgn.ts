@@ -191,3 +191,30 @@ export interface SeriesDetail {
     /** 录入时间 */
     updatedAt: string
 }
+
+// 快速导入的数据类型
+
+export interface importDetailType {
+    /** 封面 */
+    coverUrl?: string
+    /** 标题 */
+    title?: string
+    /** 原名 */
+    originalTitle?: string
+    /** 开始时间 */
+    startDate?: string // 🌟 修改 1：将 Date 改为 string
+    /** 简介 */
+    introduction?: string
+    /** 作者/原作 */
+    author?: string
+    /** 导演 */
+    director?: string
+    /** 出版社/制作组/游戏公司 */
+    studio?: string
+    /** 总集数 */
+    totalEpisodes?: number
+    /** 封面的file对象 */
+    rawfile?: File | null // 🌟 修改 2：将 RawFile 改为原生 File | null
+    /** 标签 */
+    tags: string[]
+}

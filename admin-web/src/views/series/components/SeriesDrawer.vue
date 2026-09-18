@@ -18,6 +18,11 @@
             </n-radio-group>
             <n-form ref="formRef" :model="oneForm" :style="{ maxWidth: '640px' }" label-placement="left"
                 label-width="auto" :key="acgnType" require-mark-placement="left" :rules="rules">
+                <n-form-item label="快速导入">
+                    <n-button text target="_blank" type="primary" @click="emit('getBangumiList', acgnType)">
+                        从bangumi导入
+                    </n-button>
+                </n-form-item>
                 <n-form-item v-for="item in dynamicForm" :key="item.key" :label="item.label" :path="item.key">
                     <n-upload v-if="item.type === 'url'" :default-upload='false' :max="1" list-type="image-card"
                         v-model:file-list="FileList" @change="setCoverUrl">
@@ -41,13 +46,14 @@
 </template>
 
 <script setup lang="ts">
-import type { AcgnType, SeriesDetail } from '@/types/acgn';
+import type { AcgnType, importDetailType, SeriesDetail } from '@/types/acgn';
 import { computed, ref, watch } from 'vue';
 import { SERIES_SCHEMAS } from '../Schema';
 import type { FormInst, FormRules, UploadFileInfo } from 'naive-ui';
 import { uploadCoverUrlApi } from '@/api/upload';
 const props = defineProps<{
-    detail: SeriesDetail | null
+    detail: SeriesDetail | null,
+    importDetail: importDetailType | null
 }>()
 const active = defineModel<boolean>('show', { required: true })
 // 作品的不同状态
@@ -110,6 +116,20 @@ watch(active, (isOpen) => {
     }
 
 })
+// 快速导入
+watch(() => props.importDetail, (newValue) => {
+    if (newValue) {
+        const { rawfile, ...detail } = newValue
+        rawFile.value = rawfile || null
+        FileList.value = [{
+            id: 'existing.cover',
+            name: '封面图',
+            status: 'finished',
+            url: newValue.coverUrl
+        }]
+        oneForm.value = { ...oneForm.value, ...detail }
+    }
+}, { deep: true, immediate: true })
 // 规则
 const rules = computed<FormRules>(() => {
     const rulesObj: FormRules = {}
@@ -127,7 +147,7 @@ const rules = computed<FormRules>(() => {
 })
 // 表单ref
 const formRef = ref<FormInst | null>(null)
-const emit = defineEmits(['setSeriesData'])
+const emit = defineEmits(['setSeriesData', 'getBangumiList'])
 // 提交校验
 const handleValidateClick = (e: MouseEvent) => {
     e.preventDefault() // 阻止默认事件
