@@ -11,7 +11,7 @@
                 <div class="status_left">
                     <template v-for="(item, index) in currentStatusList" :key="item.key">
                         <div class="status_item" :class="{ active: currentStatus === item.key }"
-                            @click="currentStatus = item.key">{{ item.label }}</div>
+                            @click="setKey(item.key)">{{ item.label }}</div>
                         <n-divider v-if="index < currentStatusList.length - 1" vertical />
                     </template>
                 </div>
@@ -26,10 +26,14 @@
             </div>
         </template>
         <div class="flex flex-col justify-between w-full pt-5">
-            <div
+            <div v-if="(mediaList?.length as number) > 0"
                 class="flex-1 content-start grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
                 <ContentCard v-for="item in mediaList" :key="item.id" :item="item" @click="handleOpenDetail">
                 </ContentCard>
+            </div>
+            <div v-else class="flex-1 flex justify-center items-center">
+                <n-empty description="暂无数据">
+                </n-empty>
             </div>
             <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="pageSize"
                     :item-count="total" />
@@ -55,6 +59,10 @@ import MyDrawer from './components/MyDrawer.vue';
 import MyModal from './components/MyModal.vue';
 import type { importDetailType, MediaCardDetail, MediaCardItem } from '@/types/acgn.ts';
 import { addMediaApi, deleteMediaApi, getMediaDetailApi, getMediaListApi, putUpdateMediaApi } from '@/api/media.ts';
+// 默认选中状态
+const currentStatus = ref('all')
+// 默认选中tabs 
+const defaultTbs = ref('all')
 // bangumi列表状态
 const bangumiListState = ref(false)
 const bangumitype = ref('')
@@ -91,7 +99,9 @@ const total = ref(0)
 const mediaList = ref<MediaCardItem[]>()
 // 获取作品列表
 const getMediaList = async () => {
-    const res = await getMediaListApi({ page: page.value, pageSize: pageSize.value })
+    console.log(defaultTbs.value, currentStatus.value);
+    const res = await getMediaListApi({ page: page.value, pageSize: pageSize.value, type: defaultTbs.value, status: currentStatus.value })
+    console.log(res.data?.list, 'list');
     mediaList.value = res.data?.list
     total.value = res.data!.total
 
@@ -190,9 +200,7 @@ const handleSelect = (key: string | number) => {
 // 图片懒加载
 const isLoaded = ref(true)
 
-// 默认选中tabs 
 
-const defaultTbs = ref('all')
 const tabs = [
     {
         type: 'all',
@@ -219,9 +227,14 @@ const tabs = [
 const setTabs = (type: string) => {
     defaultTbs.value = type
     currentStatus.value = 'all'
+    console.log('g');
+    getMediaList()
 }
-// 默认选中状态
-const currentStatus = ref('all')
+const setKey = (key: string) => {
+    currentStatus.value = key
+    console.log(currentStatus.value);
+    getMediaList()
+}
 const statusTextMap: Record<string, Record<string, string>> = {
     // 游戏专属文案
     game: {

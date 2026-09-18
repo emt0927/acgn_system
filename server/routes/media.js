@@ -84,7 +84,14 @@ router.delete('/delete/:id', token, async (req, res) => {
 // 获取作品列表
 router.get('/getList', token, async (req, res) => {
     try {
+        const { type, status } = req.query
         const filter = { userId: req.userId }
+        if (type && type !== 'all') {
+            filter.type = type
+        }
+        if (status && status !== 'all') {
+            filter.status = status
+        }
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.pageSize) || 12
         const skip = (page - 1) * limit

@@ -16,9 +16,13 @@
             </div>
         </template>
         <div class="flex flex-col justify-between w-full pt-5">
-            <div
+            <div v-if="(seriesList?.length as number) > 0"
                 class="flex-1 content-start grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
                 <Content v-for="item in seriesList" :key="item.id" :item=item @click="openDetail"></Content>
+            </div>
+            <div class="flex-1 flex items-center justify-center" v-else>
+                <n-empty description="暂无数据">
+                </n-empty>
             </div>
             <div class="pagination-footer"><n-pagination v-model:page="page" :page-size="pageSize"
                     :item-count="total" />
@@ -242,12 +246,14 @@ const acgnSelect = ref([
 // 类型过滤
 const setSelect = (key: string) => {
     defaultSelect.value = key
+    getSeriesList()
+
 }
 // 系列数据
 const seriesList = ref<Series[]>()
 // 获取系列列表
 const getSeriesList = async () => {
-    const res = await getSeriesListApi({ page: page.value, pageSize: pageSize.value })
+    const res = await getSeriesListApi({ page: page.value, pageSize: pageSize.value, type: defaultSelect.value })
     seriesList.value = res.data?.list
     total.value = res.data!.total
     console.log('我触发了');

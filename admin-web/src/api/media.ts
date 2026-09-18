@@ -9,7 +9,9 @@ export const addMediaApi = (data: any) => {
 //获取作品列表
 export interface pageData {
     page: number,
-    pageSize: number
+    pageSize: number,
+    type?: string,
+    status?: string
 }
 export const getMediaListApi = (data?: pageData) => {
     return request.get<{ list: MediaCardItem[], total: number }>('/media/getList', {

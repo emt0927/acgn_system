@@ -1,5 +1,5 @@
 <template>
-    <n-layout-sider bordered collapse-mode="width" class="bg-sider!"  :collapsed-width="64" :width="240" show-trigger
+    <n-layout-sider bordered collapse-mode="width" class="bg-sider!" :collapsed-width="64" :width="240" show-trigger
         :collapsed="collapsed" @collapse="collapsed = true" @expand="collapsed = false">
         <div class="sider-content">
             <n-menu :options="menuOptions" :collapsed-width="64" v-model:value="activeKey"></n-menu>
@@ -41,23 +41,10 @@ const menuOptions: MenuOption[] = [
                     name: 'home'
                 }
             },
-            { default: () => '回家' }
+            { default: () => '作品' }
         ),
         key: 'home',
         icon: renderIcon(BookIcon)
-    },
-    {
-        label: () => h(
-            RouterLink,
-            {
-                to: {
-                    name: 'chart'
-                }
-            },
-            { default: () => '看板' }
-        ),
-        key: 'chart',
-        icon: renderIcon(BarChartIcon)
     },
     {
         label: () => h(
@@ -72,6 +59,19 @@ const menuOptions: MenuOption[] = [
         key: 'series',
         icon: renderIcon(MoonIcon)
 
+    },
+    {
+        label: () => h(
+            RouterLink,
+            {
+                to: {
+                    name: 'chart'
+                }
+            },
+            { default: () => '看板' }
+        ),
+        key: 'chart',
+        icon: renderIcon(BarChartIcon)
     },
     {
         label: () => h(
