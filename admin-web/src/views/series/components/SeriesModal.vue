@@ -2,9 +2,9 @@
     <n-modal v-model:show="visible" preset="card" :style="{ width: '450px' }"
         :segmented="{ content: true, footer: true }" :content-style="{ padding: 0 }">
         <template #header>
-            <div class="truncate max-w-37.5">
-                {{ detail?.title }}
-            </div>
+            <n-ellipsis style="max-width: 150px">
+              {{ detail?.title }}
+            </n-ellipsis>
         </template>
         <template #header-extra>
             <n-button size="small" quaternary type="info" @click="setSeriesItem">

@@ -1,7 +1,13 @@
 <template>
-    <n-modal v-model:show="visible" :title="item?.title" preset="card" :style="{ width: '450px' }"
+    <n-modal v-model:show="visible" preset="card" :style="{ width: '450px' }"
         :segmented="{ content: true, footer: true }" :content-style="{ padding: 0 }">
+        <template #header>
+            <n-ellipsis style="max-width: 200px">
+                {{ item?.title }}
+            </n-ellipsis>
+        </template>
         <template #header-extra>
+
             <n-button size="small" quaternary type="primary" @click="handleEdit">
                 编辑作品
             </n-button>

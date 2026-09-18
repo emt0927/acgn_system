@@ -59,10 +59,11 @@ import MyDrawer from './components/MyDrawer.vue';
 import MyModal from './components/MyModal.vue';
 import type { importDetailType, MediaCardDetail, MediaCardItem } from '@/types/acgn.ts';
 import { addMediaApi, deleteMediaApi, getMediaDetailApi, getMediaListApi, putUpdateMediaApi } from '@/api/media.ts';
+const userStore = useUserStore()
 // 默认选中状态
-const currentStatus = ref('all')
+const currentStatus = computed(() => userStore.typeObj.status)
 // 默认选中tabs 
-const defaultTbs = ref('all')
+const defaultTbs = computed(() => userStore.typeObj.type)
 // bangumi列表状态
 const bangumiListState = ref(false)
 const bangumitype = ref('')
@@ -99,7 +100,6 @@ const total = ref(0)
 const mediaList = ref<MediaCardItem[]>()
 // 获取作品列表
 const getMediaList = async () => {
-    console.log(defaultTbs.value, currentStatus.value);
     const res = await getMediaListApi({ page: page.value, pageSize: pageSize.value, type: defaultTbs.value, status: currentStatus.value })
     console.log(res.data?.list, 'list');
     mediaList.value = res.data?.list
@@ -143,6 +143,7 @@ import { getSeriesAndMediaApi, type SeriesWithMediaData } from '@/api/serires.ts
 import BangumuList from '@/components/BangumuList.vue';
 import { getBangumiDetailApi } from '@/api/bangumi.ts';
 import { trackRecordApi } from '@/api/record.ts';
+import { useUserStore } from '@/store/index.ts';
 const message = useMessage()
 const setDetail = async (data: any) => {
     if (data.id) {
@@ -225,14 +226,11 @@ const tabs = [
 ]
 // 改变tabs 
 const setTabs = (type: string) => {
-    defaultTbs.value = type
-    currentStatus.value = 'all'
-    console.log('g');
+    userStore.updatetypeObj({ type: type })
     getMediaList()
 }
 const setKey = (key: string) => {
-    currentStatus.value = key
-    console.log(currentStatus.value);
+    userStore.updatetypeObj({ status: key })
     getMediaList()
 }
 const statusTextMap: Record<string, Record<string, string>> = {
@@ -280,6 +278,10 @@ const currentStatusList = computed(() => {
     .tabs_item.active {
         color: #4B9E5F;
     }
+}
+
+.active {
+    color: #4B9E5F !important;
 }
 
 .status {

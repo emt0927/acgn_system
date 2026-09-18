@@ -26,17 +26,20 @@
 
 
                 </div>
-                <div class="ml-5 flex-1">
+                <div class="ml-5 w-[50%]">
                     <div class="flex justify-between">
                         <div class="text-sm font-bold shrink-0">相关作品</div>
                         <div>按钮</div>
                     </div>
-                    <div class="flex flex-col max-h-80 overflow-hidden">
-                        <div class="border border-gray-100 p-1 rounded-md" v-for="item in mediaList" :key="item.id">
+                    <div class="flex flex-col h-110 justify-between">
+                        <div class="border border-gray-100 p-1 rounded-md" v-for="item in pagedMediaList"
+                            :key="item.id">
                             <div class="flex">
                                 <img :src="item.coverUrl" alt="" class="w-15 mr-2">
                                 <div>
-                                    <div class="text-xs">{{ item.title }}</div>
+                                    <n-ellipsis style="max-width: 150px">
+                                        {{ item.title }}
+                                    </n-ellipsis>
                                     <div class="text-xs">{{ item.subType }}</div>
                                     <div class="flex items-center"> <n-rate readonly allow-half :size="12"
                                             :value="(item.rating ?? 0) / 2" class="max-w-full" />
@@ -46,6 +49,10 @@
                                     <div class="text-xs">于<n-time :time="new Date(item.updatedAt as string)" />录入</div>
                                 </div>
                             </div>
+                        </div>
+                        <div class="pagination-footer">
+                            <n-pagination v-model:page="page" :page-size="pageSize"
+                                :item-count="(mediaList?.length as number)" />
                         </div>
                     </div>
                 </div>
@@ -58,7 +65,9 @@
 <script setup lang="ts">
 import type { SeriesWithMediaData } from '@/api/serires';
 import { SERIES_SCHEMAS } from '@/views/series/Schema';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+const page = ref(1)
+const pageSize = ref(4)
 
 const props = defineProps<{
     data: SeriesWithMediaData | undefined
@@ -76,8 +85,20 @@ const disableVal = (val: any) => {
     if (val === undefined || val === '' || val === null) return false
     return true
 }
-
+const pagedMediaList = computed(() => {
+    const start = (page.value - 1) * pageSize.value
+    const end = start + pageSize.value
+    return (mediaList.value as any).slice(start, end)
+})
 const showModal = defineModel<boolean>('show', { required: true })
 </script>
 
-<style scoped></style>
+<style scoped>
+.pagination-footer {
+    padding: 10px 0;
+    display: flex;
+    justify-content: flex-end;
+    /* 右对齐 */
+
+}
+</style>

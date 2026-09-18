@@ -193,6 +193,7 @@ import { getMediaListApi, updateMediaOrSreiesApi } from '@/api/media.ts';
 import BangumuList from '@/components/BangumuList.vue';
 import { getBangumiDetailApi } from '@/api/bangumi.ts';
 import { trackRecordApi } from '@/api/record.ts';
+import { useUserStore } from '@/store/index.ts';
 const setSeriesData = async (data: any) => {
     if (data.id) {
         const res = await putSeriesDetailApi(data)
@@ -213,8 +214,6 @@ const setSeriesData = async (data: any) => {
 const page = ref(1)
 const pageSize = ref(12)
 const total = ref(0)
-// 默认选中
-const defaultSelect = ref('all')
 // 类型选择
 const acgnSelect = ref([
     {
@@ -244,8 +243,13 @@ const acgnSelect = ref([
     },
 ])
 // 类型过滤
+// 默认选中
+const userStore = useUserStore()
+const defaultSelect = computed(() => {
+    return userStore.typeObj.seriesType
+})
 const setSelect = (key: string) => {
-    defaultSelect.value = key
+    userStore.updatetypeObj({ seriesType: key })
     getSeriesList()
 
 }

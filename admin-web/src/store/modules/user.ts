@@ -18,7 +18,14 @@ export const useUserStore = defineStore('acng_system', () => {
         accessToken.value = ''
         refreshToken.value = ''
     }
-
+    const typeObj = ref({
+        type: 'all',
+        status: 'all',
+        seriesType: 'all'
+    })
+    const updatetypeObj = (data: any) => {
+        Object.assign(typeObj.value, data)
+    }
     // theme 
     const isDark = useDark({
         storageKey: 'acgn-theme'
@@ -36,7 +43,7 @@ export const useUserStore = defineStore('acng_system', () => {
             isDark.value = !isDark.value
         })
     }
-    return { accessToken, refreshToken, setToken, isDark, toggleDark, clearToken }
+    return { accessToken, refreshToken, setToken, isDark, toggleDark, clearToken, typeObj, updatetypeObj }
 }, {
     persist: true
 })
