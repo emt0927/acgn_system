@@ -16,8 +16,9 @@
                     </template>
                 </div>
                 <div class="sort_item">
-                    <n-dropdown trigger="hover" :options="options" @select="handleSelect" placement="bottom-start">
-                        <span class="cursor-pointer h-full  flex items-center">排序:最近更新</span>
+                    <n-dropdown trigger="click" :show-arrow="true" :options="options" @select="handleSelect"
+                        placement="bottom-start" :render-label="renderDropdownLabel">
+                        <span class="cursor-pointer h-full  flex items-center">排序:{{ selectLabel }}</span>
                     </n-dropdown>
                 </div>
                 <div class="edit"> <n-button type="tertiary" @click="showDrawer">
@@ -53,7 +54,7 @@
 
 <script setup lang="ts">
 import MyCard from '@/components/MyCard.vue';
-import { computed, ref } from 'vue';
+import { computed, h, ref } from 'vue';
 import ContentCard from './components/ContentCard.vue';
 import MyDrawer from './components/MyDrawer.vue';
 import MyModal from './components/MyModal.vue';
@@ -98,9 +99,12 @@ const page = ref(1)
 const pageSize = ref(12)
 const total = ref(0)
 const mediaList = ref<MediaCardItem[]>()
+// 选择时触发
+const selectLabel = ref('最后添加')
+const selectedKey = ref<number>(-1)
 // 获取作品列表
 const getMediaList = async () => {
-    const res = await getMediaListApi({ page: page.value, pageSize: pageSize.value, type: defaultTbs.value, status: currentStatus.value })
+    const res = await getMediaListApi({ page: page.value, pageSize: pageSize.value, type: defaultTbs.value, status: currentStatus.value, createdAt: selectedKey.value })
     console.log(res.data?.list, 'list');
     mediaList.value = res.data?.list
     total.value = res.data!.total
@@ -137,7 +141,7 @@ const openSeriesCard = async (id: string) => {
     active.value = true
 }
 // 添加or编辑作品
-import { useMessage } from 'naive-ui'
+import { useMessage, type DropdownOption } from 'naive-ui'
 import SeriesCard from './components/SeriesCard.vue';
 import { getSeriesAndMediaApi, type SeriesWithMediaData } from '@/api/serires.ts';
 import BangumuList from '@/components/BangumuList.vue';
@@ -182,19 +186,25 @@ const DelItem = async (id: string, title: string) => {
 // 排序选择
 const options = [
     {
-        label: '滨海湾金沙，新加坡',
-        key: 'marina bay sands',
-        disabled: true
+        label: '最后添加',
+        key: -1
     },
     {
-        label: '布朗酒店，伦敦',
-        key: 'brown\'s hotel, london'
+        label: '最早添加',
+        key: 1
     }
 ]
-
-// 选择时触发
-const handleSelect = (key: string | number) => {
-    console.log('key');
+const renderDropdownLabel = (option: DropdownOption) => {
+    const isSelected = option.key === selectedKey.value
+    return h('span', {
+        style: isSelected ? 'color:#18a058; font-weight: bold;' : ''
+    }, option.label as string)
+}
+const handleSelect = async (_key: number, option: any) => {
+    selectLabel.value = option.label
+    selectedKey.value = _key
+    // 切换排序方式
+    await getMediaList()
 }
 
 

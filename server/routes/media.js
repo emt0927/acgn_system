@@ -94,8 +94,9 @@ router.get('/getList', token, async (req, res) => {
         }
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.pageSize) || 12
+        const createdAt = parseInt(req.query.createdAt) || -1 // 排序方式 默认最后添加
         const skip = (page - 1) * limit
-        const rawList = await media.find(filter).select('title coverUrl type subType status rating progress series updatedAt').sort({ createdAt: -1 }).skip(skip).limit(limit).lean()
+        const rawList = await media.find(filter).select('title coverUrl type subType status rating progress series updatedAt').sort({ createdAt }).skip(skip).limit(limit).lean()
         const total = await media.countDocuments(filter)
         // 数据清洗
         const list = rawList.map(item => ({

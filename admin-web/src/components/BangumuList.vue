@@ -18,9 +18,11 @@
                 </div>
                 <div class="max-h-130 overflow-auto" v-else>
                     <div class="flex mb-5" v-for="item in list" :key="item.id">
-                        <div class="w-20 h-30 bg-white border border-gray-200 shadow-md p-0.75 shrink-0 cursor-pointer hover:border-sky-500 hover:shadow-md"
+                        <div class="w-20 h-30 bg-gray-200 relative overflow-hidden border border-gray-200 shadow-md p-0.75 shrink-0 cursor-pointer hover:border-sky-500 hover:shadow-md"
                             @click="getBgmMedia(item.id)">
-                            <img :src="item.coverUrl" alt="" class="w-full h-full object-cover">
+                            <img :src="item.coverUrl" alt=""
+                                class="w-full h-full object-cover opacity-0 transition-opacity duration-300"
+                                loading="lazy" decoding="async" @load="handleImgLoad">
                         </div>
                         <div class="flex-1 flex-col min-w-0 px-2.5">
                             <div class="flex items-center">
@@ -47,6 +49,10 @@
 const loading = ref(false)
 import { getBangumiSearchListApi } from '@/api/bangumi';
 import { ref } from 'vue';
+const handleImgLoad = (e: Event) => {
+    const img = e.target as HTMLImageElement
+    img.classList.remove('opacity-0')
+}
 const searchValue = ref('')
 const props = defineProps<{
     type: string

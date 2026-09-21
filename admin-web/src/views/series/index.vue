@@ -78,7 +78,6 @@ const getBgmMedia = async (id: any) => {
         bangumiListState.value = false
     }
 }
-
 // 当前的系列id
 const SeriesId = ref<string>('')
 // 获取向系列添加作品需要的数据

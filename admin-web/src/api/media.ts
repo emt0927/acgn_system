@@ -12,6 +12,7 @@ export interface pageData {
     pageSize: number,
     type?: string,
     status?: string
+    createdAt?: number
 }
 export const getMediaListApi = (data?: pageData) => {
     return request.get<{ list: MediaCardItem[], total: number }>('/media/getList', {
