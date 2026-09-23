@@ -189,14 +189,14 @@ const Submit = (type: string) => {
     if (type === 'login') {
         loginRef.value?.validate(async (errors) => {
             if (!errors) {
-                const res = await loginApi(loginForm)
-                message.success(`${res.message}`)
-                // 将token存入仓库持久化
-                userStore.setToken(res.data!)
-                // 清空输入框数据
-                resetLoginForm()
-                // 跳转首页
-                router.replace({ name: 'home' })
+                const res = await userStore.loginAction(loginForm)
+                if (res.code === 200) {
+                    message.success(`${res.message}`)
+                    // 清空输入框数据
+                    resetLoginForm()
+                    // 跳转首页
+                    router.replace({ name: 'home' })
+                }
             } else {
                 console.log(errors)
                 message.error('验证失败')

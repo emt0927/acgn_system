@@ -4,6 +4,12 @@
             <div class="tabs overflow-x-auto whitespace-nowrap">
                 <div class="tabs_item px-5 cursor-pointer" v-for="(item) in tabs" :key="item.type"
                     :class="{ active: defaultTbs === item.type }" @click="setTabs(item.type)">{{ item.name }}</div>
+                <div class="sort_item pl-5">
+                    <n-dropdown trigger="click" :show-arrow="true" :options="options" @select="handleSelect"
+                        placement="bottom-start" :render-label="renderDropdownLabel">
+                        <span class="cursor-pointer h-full  flex items-center">排序:{{ selectLabel }}</span>
+                    </n-dropdown>
+                </div>
             </div>
         </template>
         <template #action>
@@ -15,12 +21,7 @@
                         <n-divider v-if="index < currentStatusList.length - 1" vertical />
                     </template>
                 </div>
-                <div class="sort_item">
-                    <n-dropdown trigger="click" :show-arrow="true" :options="options" @select="handleSelect"
-                        placement="bottom-start" :render-label="renderDropdownLabel">
-                        <span class="cursor-pointer h-full  flex items-center">排序:{{ selectLabel }}</span>
-                    </n-dropdown>
-                </div>
+
                 <div class="edit"> <n-button type="tertiary" @click="showDrawer">
                         点击录入
                     </n-button></div>
@@ -208,8 +209,6 @@ const handleSelect = async (_key: number, option: any) => {
 }
 
 
-// 图片懒加载
-const isLoaded = ref(true)
 
 
 const tabs = [

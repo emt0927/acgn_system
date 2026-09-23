@@ -56,7 +56,7 @@ req.interceptors.response.use(async function (response) {
     if (config.url === '/auth/refresh') {
       // 长token也失效了
       retryQueue.value = []
-      userStore.clearToken() // 清空pinia中的Token
+      userStore.logout() // 清空pinia中的Token
       router.replace({ name: 'login' }) // 跳到登录页重新登录
       return
     }
@@ -87,7 +87,7 @@ req.interceptors.response.use(async function (response) {
     } catch (error) {
       //校验失败
       retryQueue.value = []
-      userStore.clearToken()
+      userStore.logout()
       router.replace({ name: 'login' })
       return Promise.reject(error)
     } finally {

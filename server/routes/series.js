@@ -31,8 +31,9 @@ router.get('/get', token, async (req, res) => {
         }
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.pageSize) || 12
+        const createdAt = parseInt(req.query.createdAt) || -1 // 排序方式
         const skip = (page - 1) * limit
-        const rawList = await series.find(filter).select('title coverUrl type').sort({ createdAt: -1 }).skip(skip).limit(limit).lean()
+        const rawList = await series.find(filter).select('title coverUrl type').sort({ createdAt }).skip(skip).limit(limit).lean()
         const total = await series.countDocuments(filter)
         // 数据清洗
         const list = rawList.map(({ _id, title, type, coverUrl }) => ({

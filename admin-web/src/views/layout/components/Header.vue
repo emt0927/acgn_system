@@ -14,12 +14,13 @@
         <div class="head-right">
             <div @click="userStore.toggleDark" class="flex justify-center items-center cursor-pointer">
                 <n-icon size="24" color="text-sider">
-                    <MoonIcon  v-if="userStore.isDark"/>
-                    <SunnyIcon v-else/>
+                    <MoonIcon v-if="userStore.isDark" />
+                    <SunnyIcon v-else />
                 </n-icon>
             </div>
-            <img src="../../../assets/ldws.jpg" alt="" class="avatar">
-            <div class="exit" @click="exit">退出</div>
+            <n-dropdown trigger="hover" :options="options" @select="handleSelect">
+                <img :src="userStore.userInfo.coverurl" alt="" class="avatar">
+            </n-dropdown>
         </div>
     </n-layout-header>
 
@@ -27,13 +28,31 @@
 
 <script setup lang="ts">
 import { useUserStore } from '@/store';
-import { Sunny as SunnyIcon} from '@vicons/ionicons5'
+import { Sunny as SunnyIcon } from '@vicons/ionicons5'
 import { Moon as MoonIcon } from '@vicons/ionicons5'
+import { useMessage } from 'naive-ui';
+import { useRouter } from 'vue-router'
+const router = useRouter()
 const userStore = useUserStore()
-// 点击退出
-const exit = () => {
-    console.log('我退出了');
+const message = useMessage()
+const options = [{
+    label: '退出登录',
+    key: 'logout'
+}, {
+    label: '其他',
+    key: 'any'
+}]
+
+const handleSelect = (key: string) => {
+    if (key === 'logout') {
+        userStore.logout()
+        message.success('已退出登录')
+        router.replace('/login')
+    } else if (key === 'any') {
+        console.log('我是其他');
+    }
 }
+
 </script>
 <style scoped lang="scss">
 /* 3. 顶部 Header 透明度控制 */
@@ -70,10 +89,6 @@ const exit = () => {
         width: 48px;
         height: 48px;
         margin: 0 10px;
-    }
-
-    .exit {
-        cursor: pointer;
     }
 }
 </style>

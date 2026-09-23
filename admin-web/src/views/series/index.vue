@@ -4,15 +4,22 @@
             作品系列
         </template>
         <template #action>
-            <div class="flex justify-between">
+            <div class="flex">
                 <div class="flex items-center cursor-pointer">
                     <div :class="['mr-10', defaultSelect === item.value ? 'text-[#4B9E5F]' : '']"
                         v-for="item in acgnSelect" :key="item.id" @click="setSelect(item.value)">{{ item.label }}</div>
                 </div>
-                <n-button type="tertiary" @click="setSeries">
-                    添加系列
-                </n-button>
-
+                <div class="sort_item">
+                    <n-dropdown trigger="click" :show-arrow="true" :options="options" @select="handleSelect"
+                        placement="bottom-start" :render-label="renderDropdownLabel">
+                        <span class="cursor-pointer h-full  flex items-center">排序:{{ selectLabel }}</span>
+                    </n-dropdown>
+                </div>
+                <div class="flex flex-1 justify-end">
+                    <n-button type="tertiary" @click="setSeries">
+                        添加系列
+                    </n-button>
+                </div>
             </div>
         </template>
         <div class="flex flex-col justify-between w-full pt-5">
@@ -50,6 +57,26 @@ import SeriesModal from './components/SeriesModal.vue';
 import SeriesDrawer from './components/SeriesDrawer.vue';
 import SeriesItemModal from './components/SeriesItemModal.vue';
 import { addSeriesApi, deleteSeriesApi, getSeriesAndMediaApi, getSeriesDetailApi, getSeriesListApi, putSeriesDetailApi } from '@/api/serires.ts';
+const selectLabel = ref('最后添加')
+const selectKey = ref(-1)
+const handleSelect = (key: number, option: any) => {
+    selectKey.value = key
+    selectLabel.value = option.label
+    getSeriesList()
+}
+const options = [{
+    label: '最后添加',
+    key: -1
+}, {
+    label: '最早添加',
+    key: 1
+}]
+const renderDropdownLabel = (option: DropdownOption) => {
+    const isSelected = option.key === selectKey.value
+    return h('span', {
+        style: isSelected ? 'color:#18a058; font-weight: bold;' : ''
+    }, option.label as string)
+}
 // bangumi列表状态
 const bangumiListState = ref(false)
 const bangumitype = ref('')
@@ -132,7 +159,6 @@ const updateSeries = async (id: string, show: string) => {
 const SeriesorMediaData = async () => {
     const res = await getSeriesAndMediaApi(SeriesId.value)
     newSeriesList.value = res.data?.mediaList ?? []
-    console.log(res.data?.mediaList, 123123231);
 }
 // 抽屉开关
 const active = ref(false)
@@ -148,7 +174,7 @@ const SeriesEdit = (detail: SeriesDetail) => {
     seriesItem.value = detail
     active.value = true
 }
-import { useMessage, useDialog } from 'naive-ui'
+import { useMessage, useDialog, type DropdownOption } from 'naive-ui'
 const message = useMessage()
 const dialog = useDialog()
 // 删除系列
@@ -256,7 +282,7 @@ const setSelect = (key: string) => {
 const seriesList = ref<Series[]>()
 // 获取系列列表
 const getSeriesList = async () => {
-    const res = await getSeriesListApi({ page: page.value, pageSize: pageSize.value, type: defaultSelect.value })
+    const res = await getSeriesListApi({ page: page.value, pageSize: pageSize.value, type: defaultSelect.value, createdAt: selectKey.value })
     seriesList.value = res.data?.list
     total.value = res.data!.total
     console.log('我触发了');

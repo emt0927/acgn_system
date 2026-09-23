@@ -77,7 +77,7 @@ const getCommonFooter = (type: AcgnType): FieldConfig[] => {
         { label: '作品介绍', key: 'introduction', formType: 'textarea' },
         { label: '开始时间', key: 'startDate', formType: 'date' },
         { label: '结束时间', key: 'finishDate', formType: 'date' },
-        { label: '添加时间', key: 'updatedAt', editable: false, type: 'date' },
+        { label: '录入时间', key: 'updatedAt', editable: false, type: 'date' },
     ]
 }
 
