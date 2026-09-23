@@ -13,6 +13,7 @@ export interface pageData {
     type?: string,
     status?: string
     createdAt?: number
+    keyword?: string
 }
 export const getMediaListApi = (data?: pageData) => {
     return request.get<{ list: MediaCardItem[], total: number }>('/media/getList', {

@@ -24,10 +24,15 @@ router.post('/add', token, async (req, res) => {
 // 获取系列
 router.get('/get', token, async (req, res) => {
     try {
-        const { type } = req.query
+        const { type, keyword } = req.query
         const filter = { userId: req.userId }
         if (type && type !== 'all') {
             filter.type = type
+        }
+        if (keyword && keyword.trim()) {
+            const safeKeyword = keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            const regex = new RegExp(safeKeyword, 'i')
+            filter.title = { $regex: regex }
         }
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.pageSize) || 12

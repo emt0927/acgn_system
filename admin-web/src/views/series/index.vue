@@ -4,18 +4,26 @@
             作品系列
         </template>
         <template #action>
-            <div class="flex">
+            <div class="flex px-5 overflow-x-auto whitespace-nowrap">
                 <div class="flex items-center cursor-pointer">
                     <div :class="['mr-10', defaultSelect === item.value ? 'text-[#4B9E5F]' : '']"
                         v-for="item in acgnSelect" :key="item.id" @click="setSelect(item.value)">{{ item.label }}</div>
                 </div>
-                <div class="sort_item">
+                <div class="sort_item flex shrink-0 gap-4">
+                    <div class="search">
+                        <n-input-group>
+                            <n-input :style="{ width: '120px' }" v-model:value="searchValue" :allow-input="noSideSpace" />
+                            <n-button type="primary" @click="Search">
+                                搜索
+                            </n-button>
+                        </n-input-group>
+                    </div>
                     <n-dropdown trigger="click" :show-arrow="true" :options="options" @select="handleSelect"
                         placement="bottom-start" :render-label="renderDropdownLabel">
                         <span class="cursor-pointer h-full  flex items-center">排序:{{ selectLabel }}</span>
                     </n-dropdown>
                 </div>
-                <div class="flex flex-1 justify-end">
+                <div class="flex flex-1 justify-end  ml-4">
                     <n-button type="tertiary" @click="setSeries">
                         添加系列
                     </n-button>
@@ -76,6 +84,15 @@ const renderDropdownLabel = (option: DropdownOption) => {
     return h('span', {
         style: isSelected ? 'color:#18a058; font-weight: bold;' : ''
     }, option.label as string)
+}
+const searchValue = ref('')
+// 搜索
+const noSideSpace = (value: string) => {
+    return !value.startsWith(' ') && !value.endsWith(' ')
+}
+const Search = async () => {
+    await getSeriesList()
+    searchValue.value = ''
 }
 // bangumi列表状态
 const bangumiListState = ref(false)
@@ -282,7 +299,8 @@ const setSelect = (key: string) => {
 const seriesList = ref<Series[]>()
 // 获取系列列表
 const getSeriesList = async () => {
-    const res = await getSeriesListApi({ page: page.value, pageSize: pageSize.value, type: defaultSelect.value, createdAt: selectKey.value })
+    const res = await getSeriesListApi({ page: page.value, pageSize: pageSize.value, type: defaultSelect.value, createdAt: selectKey.value, keyword: searchValue.value })
+    console.log(res.data?.list);
     seriesList.value = res.data?.list
     total.value = res.data!.total
     console.log('我触发了');
@@ -298,6 +316,7 @@ const openDetail = async (id: string) => {
     showDetail.value = true
 
 }
+
 </script>
 
 <style scoped>

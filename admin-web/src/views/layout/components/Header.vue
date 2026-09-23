@@ -2,14 +2,6 @@
     <n-layout-header style="height: 64px;" bordered>
         <div class="head-left">
             <div class="title">ACNG Realm</div>
-            <div class="search">
-                <n-input-group>
-                    <n-input :style="{ width: '50%' }" />
-                    <n-button type="primary">
-                        搜索
-                    </n-button>
-                </n-input-group>
-            </div>
         </div>
         <div class="head-right">
             <div @click="userStore.toggleDark" class="flex justify-center items-center cursor-pointer">
@@ -69,12 +61,6 @@ const handleSelect = (key: string) => {
         width: 240px;
         text-align: center;
     }
-
-    .search {
-        display: flex;
-        align-items: center;
-    }
-
 }
 
 .head-right {

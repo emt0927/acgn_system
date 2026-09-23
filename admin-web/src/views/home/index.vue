@@ -2,9 +2,17 @@
     <MyCard>
         <template #cardTab>
             <div class="tabs overflow-x-auto whitespace-nowrap">
-                <div class="tabs_item px-5 cursor-pointer" v-for="(item) in tabs" :key="item.type"
+                <div class="tabs_item px-5 cursor-pointer flex items-center" v-for="(item) in tabs" :key="item.type"
                     :class="{ active: defaultTbs === item.type }" @click="setTabs(item.type)">{{ item.name }}</div>
-                <div class="sort_item pl-5">
+                <div class="sort_item pl-5 flex shrink-0 gap-4">
+                    <div class="search">
+                        <n-input-group>
+                            <n-input :style="{ width: '120px' }" v-model:value="searchValue" :allow-input="noSideSpace" />
+                            <n-button type="primary" @click="Search">
+                                搜索
+                            </n-button>
+                        </n-input-group>
+                    </div>
                     <n-dropdown trigger="click" :show-arrow="true" :options="options" @select="handleSelect"
                         placement="bottom-start" :render-label="renderDropdownLabel">
                         <span class="cursor-pointer h-full  flex items-center">排序:{{ selectLabel }}</span>
@@ -27,7 +35,7 @@
                     </n-button></div>
             </div>
         </template>
-        <div class="flex flex-col justify-between w-full pt-5">
+        <div class="flex flex-col justify-between w-full pt-5 ">
             <div v-if="(mediaList?.length as number) > 0"
                 class="flex-1 content-start grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
                 <ContentCard v-for="item in mediaList" :key="item.id" :item="item" @click="handleOpenDetail">
@@ -105,11 +113,20 @@ const selectLabel = ref('最后添加')
 const selectedKey = ref<number>(-1)
 // 获取作品列表
 const getMediaList = async () => {
-    const res = await getMediaListApi({ page: page.value, pageSize: pageSize.value, type: defaultTbs.value, status: currentStatus.value, createdAt: selectedKey.value })
+    const res = await getMediaListApi({ page: page.value, pageSize: pageSize.value, type: defaultTbs.value, status: currentStatus.value, createdAt: selectedKey.value, keyword: searchValue.value })
     console.log(res.data?.list, 'list');
     mediaList.value = res.data?.list
     total.value = res.data!.total
 
+}
+const searchValue = ref('')
+// 搜索
+const noSideSpace = (value: string) => {
+    return !value.startsWith(' ') && !value.endsWith(' ')
+}
+const Search = async () => {
+    await getMediaList()
+    searchValue.value = ''
 }
 getMediaList()
 // 拿到详情数据
