@@ -40,23 +40,29 @@ router.post('/login', async (req, res) => {
     }
     // 短token 
     const accessToken = jwt.sign(
-        { id: user._id},
+        { id: user._id },
         JWT_SECRET,
-        { expiresIn: '2h' }
+        { expiresIn: '5s' }
     )
+    console.log(accessToken, 'accessToken');
     // 长期token 
     const refreshToken = jwt.sign({ id: user._id }, REFRESH_TOKEN_SECRET, { expiresIn: '7d' })
+    // 长 Token 种到客户端浏览器的 Cookie 里
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
     //返回前端
     res.send({
         code: 200, message: '登录成功', data: {
-            accessToken,
-            refreshToken
+            accessToken
         }
     })
 })
 // 换取token
 router.post('/refresh', (req, res) => {
-    const { token } = req.body
+    const token = req.cookies?.refreshToken
+    console.log('触发', token);
     if (!token) {
         return res.json({ code: 401, message: '未提供refreshToken' })
     }
@@ -64,9 +70,9 @@ router.post('/refresh', (req, res) => {
         const decoded = jwt.verify(token, REFRESH_TOKEN_SECRET)
         // 校验通过
         const newAccessToken = jwt.sign(
-            { id: decoded.id},
+            { id: decoded.id },
             JWT_SECRET,
-            { expiresIn: '2h' }
+            { expiresIn: '5s' }
         )
         //返回给前端
         return res.json({
@@ -78,10 +84,19 @@ router.post('/refresh', (req, res) => {
         })
     } catch (error) {
         console.log('refreshToken 校验失败:', error.message)
+        res.clearCookie('refreshToken', { httpOnly: true })
         return res.json({
             code: 401,
             message: '长登录状态已过期，请重新登录'
         })
     }
+})
+
+// 退出登录
+router.post('/logout', async (req, res) => {
+    res.clearCookie('refreshToken', {
+        httpOnly: true
+    })
+    res.json({ code: 200, message: '退出成功' })
 })
 module.exports = router

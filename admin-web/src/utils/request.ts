@@ -17,7 +17,8 @@ declare module 'axios' {
 // 1. 创建实例
 const req = axios.create({
   baseURL: 'http://localhost:3000',
-  timeout: 15000
+  timeout: 15000,
+  withCredentials: true
 });
 // 2. 请求拦截器
 req.interceptors.request.use(function (config) {
@@ -72,7 +73,7 @@ req.interceptors.response.use(async function (response) {
     isRefreshing.value = true
     // 第一个请求进来 拿长token换一个新的短token
     try {
-      const res = await reToken(userStore.refreshToken)
+      const res = await reToken()
       if (res.code !== 200 || !res.data?.accessToken) throw new Error('校验失败')
       const newToken = res.data.accessToken
       // 更新请求头

@@ -1,4 +1,4 @@
-import { loginApi } from "@/api/admin";
+import { loginApi, logoutApi } from "@/api/admin";
 import { getUserInfoApi } from "@/api/user";
 import { useDark, useToggle } from "@vueuse/core";
 import { defineStore } from "pinia";
@@ -7,29 +7,31 @@ import { ref } from "vue";
 export const useUserStore = defineStore('acng_system', () => {
     // 短期token
     const accessToken = ref('')
-    // 长期token
-    const refreshToken = ref('')
     // 设置token  
     const loginAction = async (data: any) => {
         const res = await loginApi(data)
         console.log(res.data);
         if (res.code === 200) {
             accessToken.value = res.data!.accessToken
-            refreshToken.value = res.data!.refreshToken
             // 获取个人信息
             await getUserinfoData()
         }
         return res
     }
     // 清空一切 退出登录
-    const logout = () => {
-        accessToken.value = ''
-        refreshToken.value = ''
-        userInfo.value = { username: '', nickname: '', coverurl: '' }
-        typeObj.value = {
-            type: 'all',
-            status: 'all',
-            seriesType: 'all'
+    const logout = async () => {
+        try {
+            await logoutApi()
+        } catch (error) {
+            console.log('退出接口调用失败，但仍需清空本地状态')
+        } finally {
+            accessToken.value = ''
+            userInfo.value = { username: '', nickname: '', coverurl: '' }
+            typeObj.value = {
+                type: 'all',
+                status: 'all',
+                seriesType: 'all'
+            }
         }
     }
     // 个人资料
@@ -75,7 +77,7 @@ export const useUserStore = defineStore('acng_system', () => {
         })
     }
     return {
-        accessToken, refreshToken, loginAction, isDark, toggleDark, logout, typeObj, updatetypeObj, userInfo,
+        accessToken, loginAction, isDark, toggleDark, logout, typeObj, updatetypeObj, userInfo,
         getUserinfoData,
     }
 }, {

@@ -24,8 +24,10 @@ export const loginApi = (data: registerType) => {
 }
 
 // token过期 换取token
-export const reToken = (token: string) => {
-    return request.post<{ accessToken: string }>('/auth/refresh', {
-        token
-    })
+export const reToken = () => {
+    return request.post<{ accessToken: string }>('/auth/refresh')
+}
+// 退出登录
+export const logoutApi = () => {
+    return request.post('/auth/logout')
 }
