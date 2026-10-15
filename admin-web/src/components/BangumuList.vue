@@ -34,8 +34,8 @@
                                 <span class="text-[#999] text-[10px] truncate block">{{ item.originalTitle }}</span>
                             </div>
                             <div class="pt-2.5 flex text-[#666] text-[12px]">
-                                {{ item.date }}/ {{ item.director }}/ {{ item.originalWork }}/ {{
-                                    item.characterDesign }}
+                                {{ item.date }}/ {{ item.director }}/ {{ item.characterDesign }}/ {{
+                                    item.originalWork }}
                             </div>
                         </div>
                     </div>

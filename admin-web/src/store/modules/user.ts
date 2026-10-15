@@ -3,7 +3,8 @@ import { getUserInfoApi } from "@/api/user";
 import { useDark, useToggle } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-
+import defaultAvatarImg from '@/assets/ldws.jpg'
+export const DEFAULT_AVATAR = defaultAvatarImg
 export const useUserStore = defineStore('acng_system', () => {
     // 短期token
     const accessToken = ref('')
@@ -38,7 +39,7 @@ export const useUserStore = defineStore('acng_system', () => {
     const userInfo = ref({
         username: '',
         nickname: '',
-        coverurl: ''
+        coverurl: DEFAULT_AVATAR
     })
     const getUserinfoData = async () => {
         try {
@@ -46,7 +47,10 @@ export const useUserStore = defineStore('acng_system', () => {
             if (!accessToken.value) return
             const res = await getUserInfoApi()
             console.log(res.data);
-            userInfo.value = res.data
+            userInfo.value =  {
+               ... res.data,
+               coverurl:res.data?.coverurl || DEFAULT_AVATAR
+            }
         } catch (error) {
             console.error('获取用户信息失败', error)
         }

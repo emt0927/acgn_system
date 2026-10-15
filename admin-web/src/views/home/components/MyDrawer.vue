@@ -44,7 +44,7 @@
                     <n-date-picker v-else-if="item.formType === 'date'" v-model:formatted-value="oneForm[item.key]"
                         value-format="yyyy-MM-dd" type="date" clearable></n-date-picker>
                     <n-input-number v-else-if="item.formType === 'rate'" :placeholder="'请进行评价 1~10分制'" style="flex: 1;"
-                        v-model:value="oneForm[item.key]"></n-input-number>
+                        v-model:value="oneForm[item.key]" :max="10"></n-input-number>
                     <n-input v-model:value="oneForm[item.key]" v-else />
                 </n-form-item>
                 <n-form-item>
@@ -211,20 +211,20 @@ watch(() => props.active, (isOpen) => {
 // 快速导入
 watch(() => props.importDetail, (newValue) => {
     if (newValue) {
-        const {  rawfile, totalEpisodes, ...detail } = newValue
+        const { rawfile, totalEpisodes, ...detail } = newValue
         if (totalEpisodes) {
             // 总集数
             oneForm.value.progress.total = totalEpisodes
         }
-            // 换封面图
-            FileList.value = [
-                {
-                    id: 'existing.cover',
-                    name: '封面图',
-                    status: 'finished',
-                    url: newValue.coverUrl
-                }
-            ]
+        // 换封面图
+        FileList.value = [
+            {
+                id: 'existing.cover',
+                name: '封面图',
+                status: 'finished',
+                url: newValue.coverUrl
+            }
+        ]
         // 封面图的file对象
         rawFile.value = rawfile ?? null
         oneForm.value = { ...oneForm.value, ...detail }

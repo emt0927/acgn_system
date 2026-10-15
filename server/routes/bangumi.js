@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router()
 const axios = require('axios')
-
+const { HttpsProxyAgent } = require('https-proxy-agent')
+const proxyAgent = process.env.NODE_ENV !== 'production'
+    ? new HttpsProxyAgent('http://127.0.0.1:7897')
+    : undefined
 // 过滤函数 
 const getInfoboxValue = (infobox, keyName) => {
     if (!Array.isArray(infobox)) return ''
@@ -10,16 +13,16 @@ const getInfoboxValue = (infobox, keyName) => {
     if (typeof target.value === 'string') {
         return target.value
     } else if (Array.isArray(target.value)) {
-        return target.value.map(v => (typeof v === 'object' ? v.v || v.k || '' : v)).json('/')
+        return target.value.map(v => (typeof v === 'object' ? v.v || v.k || '' : v)).join('/')
     }
     return String(target.value)
 }
+
 // 快速搜索
 router.get('/searchList', async (req, res) => {
 
     try {
         const { keyword, type } = req.query
-        console.log(keyword, type);
         const typeMap = {
             anime: [2],
             novel: [1],
@@ -37,7 +40,9 @@ router.get('/searchList', async (req, res) => {
             headers: {
                 'User-Agent': 'acgn_system/1.0 (https://github.com/emt0927/acgn_system)'
             },
-            timeout: 8000
+            timeout: 15000,
+            proxy: false,
+            httpsAgent: proxyAgent
         })
         // 数据清洗
         const rawList = response.data.data || []
@@ -48,23 +53,70 @@ router.get('/searchList', async (req, res) => {
                 data: []
             })
         }
-        const formattedList = rawList.map(item => ({
-            id: item.id,
-            date: item.date,
-            title: item.name_cn || item.name,
-            originalTitle: item.name,
-            coverUrl: item.image,
-            director: getInfoboxValue(item.infobox, '导演'),
-            characterDesign: getInfoboxValue(item.infobox, '人物设定'),
-            originalWork: getInfoboxValue(item.infobox, '原作')
+        // 2. 根据不同 type 提取搜索列表的展示信息
+        const formatSearchItem = (item, type) => {
+            const infobox = item.infobox || []
+            const base = {
+                id: item.id,
+                date: item.date || getInfoboxValue(infobox, '发行日期', '发售日', '开始'),
+                title: item.name_cn || item.name,
+                originalTitle: item.name,
+                coverUrl: item.image,
+            }
 
-        }))
+            // 如果是游戏 (game)
+            if (type === 'game') {
+                const platform = getInfoboxValue(infobox, '平台')
+                const gameType = getInfoboxValue(infobox, '游戏类型')
+                const developer = getInfoboxValue(infobox, '开发', '游戏开发商', '发行')
+                return {
+                    ...base,
+                    // 既保留独立语义字段，又兼容前端原有的 3 个字段名
+                    platform,
+                    gameType,
+                    developer,
+                    director: platform,          // 对应第1栏：PC、Android、iOS、PS5
+                    characterDesign: gameType,   // 对应第2栏：回合制RPG（银河冒险策略）
+                    originalWork: developer,     // 对应第3栏：米哈游
+                    // 官网同款一行拼接文案："2023-04-26 / PC、Android、iOS、PS5 / 回合制RPG（银河冒险策略） / 米哈游"
+                    infoSummary: [base.date, platform, gameType, developer].filter(Boolean).join(' / ')
+                }
+            }
+
+            // 如果是小说或漫画 (novel / manga)
+            if (type === 'novel' || type === 'manga') {
+                const author = getInfoboxValue(infobox, '作者', '原作')
+                const publisher = getInfoboxValue(infobox, '出版社', '连载杂志')
+                const status = getInfoboxValue(infobox, '页数', '话数')
+                return {
+                    ...base,
+                    director: author,
+                    characterDesign: publisher,
+                    originalWork: status,
+                    infoSummary: [base.date, author, publisher, status].filter(Boolean).join(' / ')
+                }
+            }
+
+            // 默认：动画 (anime)
+            const director = getInfoboxValue(infobox, '导演')
+            const characterDesign = getInfoboxValue(infobox, '人物设定')
+            const originalWork = getInfoboxValue(infobox, '原作')
+            return {
+                ...base,
+                director,
+                characterDesign,
+                originalWork,
+                infoSummary: [base.date, director, characterDesign, originalWork].filter(Boolean).join(' / ')
+            }
+        }
+        const formattedList = rawList.map(item => formatSearchItem(item, type))
         res.json({
             code: 200,
             message: '搜索成功',
             data: formattedList
         })
     } catch (error) {
+        console.log(error);
         res.status(500).json({ code: 500, message: '服务器内部错误', data: [] })
     }
 })
@@ -87,6 +139,8 @@ const cleanBangumiData = (raw, category) => {
         startDate: raw.date || '',
         // 作品介绍
         introduction: raw.summary || '',
+        // 评分
+        rating: raw.rating.score ?? 0
     }
     switch (category) {
         case 'anime':
@@ -124,11 +178,12 @@ router.get('/detail', async (req, res) => {
             headers: {
                 'User-Agent': 'acgn_system/1.0 (https://github.com/emt0927/acgn_system)'
             },
-            timeout: 8000
+            timeout: 15000,
+            proxy: false,
+            httpsAgent: proxyAgent
         })
-        console.log(123);
-        console.log(response, 'w s dsdsadasdsadsad');
         const rawList = response.data || []
+        console.log(rawList, 'rawList');
         const detail = cleanBangumiData(rawList, type) || []
         return res.json({
             code: 200,

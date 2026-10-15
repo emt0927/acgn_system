@@ -99,6 +99,7 @@ const getBgmMedia = async (id: any) => {
     if (res.data.coverUrl) {
         rawfile.value = await urlToFile(res.data.coverUrl)
         detail.value = { ...res.data, rawfile: rawfile.value }
+    console.log(detail.value, '111111111');
         importDetail.value = detail.value
         bangumiListState.value = false
     }
