@@ -44,7 +44,7 @@ export default router
 router.beforeEach((to, from, next) => {
     const userStore = useUserStore()
     const needsAuth = to.matched.some(record => record.meta.requiresAuth)
-    const isToken = userStore.accessToken || userStore.refreshToken
+    const isToken = userStore.accessToken
     if (needsAuth && !isToken) {
         console.log('我来了');
         // 记录用户原本想去的地方
