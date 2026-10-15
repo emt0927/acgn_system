@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router()
 const axios = require('axios')
-const { HttpsProxyAgent } = require('https-proxy-agent')
-const proxyAgent = process.env.NODE_ENV !== 'production'
-    ? new HttpsProxyAgent('http://127.0.0.1:7897')
-    : undefined
+let proxyAgent = undefined
+if (process.env.NODE_ENV !== 'production') {
+    const { HttpsProxyAgent } = require('https-proxy-agent')
+    proxyAgent = new HttpsProxyAgent('http://127.0.0.1:7897')
+}
 // 过滤函数 
 const getInfoboxValue = (infobox, keyName) => {
     if (!Array.isArray(infobox)) return ''
