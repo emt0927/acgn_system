@@ -16,7 +16,7 @@ declare module 'axios' {
 }
 // 1. 创建实例
 const req = axios.create({
-  baseURL: import.meta.env.PRDD ? '/api' : 'http://localhost:3000',
+  baseURL: import.meta.env.PROD ? '/api' : 'http://localhost:3000',
   timeout: 15000,
   withCredentials: true
 });
