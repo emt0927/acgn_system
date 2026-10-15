@@ -2,21 +2,29 @@ const express = require("express");
 const router = express.Router()
 const axios = require('axios')
 let proxyAgent = undefined
-if (process.env.NODE_ENV !== 'production') {
-    const { HttpsProxyAgent } = require('https-proxy-agent')
-    proxyAgent = new HttpsProxyAgent('http://127.0.0.1:7897')
+const isOnline = process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NODE_ENV === 'production' || (process.env.DB_HOST && process.env.DB_HOST.includes('mongodb+srv'))
+if (!isOnline) {
+    try {
+        const { HttpsProxyAgent } = require('https-proxy-agent')
+        proxyAgent = new HttpsProxyAgent('http://127.0.0.1:7897')
+    } catch (e) {
+        proxyAgent = undefined
+    }
 }
 // 过滤函数 
-const getInfoboxValue = (infobox, keyName) => {
+const getInfoboxValue = (infobox, ...keyName) => {
     if (!Array.isArray(infobox)) return ''
-    const target = infobox.find(item => item.key === keyName)
-    if (!target) return ''
-    if (typeof target.value === 'string') {
-        return target.value
-    } else if (Array.isArray(target.value)) {
-        return target.value.map(v => (typeof v === 'object' ? v.v || v.k || '' : v)).join('/')
+    for (const key of keyNames) {
+        const target = infobox.find(item => item.key === key)
+        if (!target) return ''
+        if (typeof target.value === 'string') {
+            return target.value
+        } else if (Array.isArray(target.value)) {
+            return target.value.map(v => (typeof v === 'object' ? v.v || v.k || '' : v)).join('/')
+        }
+        return String(target.value)
     }
-    return String(target.value)
+return ''
 }
 
 // 快速搜索
@@ -163,7 +171,7 @@ const cleanBangumiData = (raw, category) => {
         case 'game':
             return {
                 ...common,
-                studio: getInfoboxValue(infobox, '开发') || getInfoboxValue(infobox, '发行') || ''
+                studio: getInfoboxValue(infobox, '开发','发行')
             }
         case 'series':
             return {
