@@ -1,5 +1,8 @@
-require('dotenv').config()
-require('./mongoDB/db')
+
+if (!process.env.NETLIFY && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    require('dotenv').config()
+}
+const { connectDB } = require('./mongoDB/db')
 const cookieParser = require('cookie-parser')
 const express = require('express')
 const cors = require('cors')
@@ -15,12 +18,26 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: false }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+app.use(async (req, res, next) => {
+    try {
+        await connectDB()
+        next()
+    } catch (err) {
+        console.error('数据库连接异常:', err.message)
+        return res.status(500).json({
+            code: 500,
+            message: '数据库连接失败: ' + err.message
+        })
+    }
+})
 // 挂载路由
 const mainRouter = require('./routes/index')
 app.use('/', mainRouter)
-
-if (process.env.NODE_ENV !== 'production') {
+const isServerless = process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NODE_ENV === 'production'
+if (!isServerless) {
     const PORT = process.env.PORT || 3000
-    app.listen(PORT, () => console.log(`🚀 服务启动于: http://localhost:${PORT}`))
+    connectDB().then(() => {
+           app.listen(PORT, () => console.log(`🚀 服务启动于: http://localhost:${PORT}`))
+    })
 }
 module.exports = app
