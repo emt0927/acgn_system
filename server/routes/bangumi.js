@@ -12,11 +12,11 @@ if (!isOnline) {
     }
 }
 // 过滤函数 
-const getInfoboxValue = (infobox, ...keyName) => {
+const getInfoboxValue = (infobox, ...keyNames) => {
     if (!Array.isArray(infobox)) return ''
     for (const key of keyNames) {
         const target = infobox.find(item => item.key === key)
-        if (!target) return ''
+        if (!target || !target.value) continue
         if (typeof target.value === 'string') {
             return target.value
         } else if (Array.isArray(target.value)) {
