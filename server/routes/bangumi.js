@@ -5,6 +5,7 @@ let proxyAgent = undefined
 const isOnline = process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NODE_ENV === 'production' || (process.env.DB_HOST && process.env.DB_HOST.includes('mongodb+srv'))
 if (!isOnline) {
     try {
+        console.log('7897进来了');
         const { HttpsProxyAgent } = require('https-proxy-agent')
         proxyAgent = new HttpsProxyAgent('http://127.0.0.1:7897')
     } catch (e) {

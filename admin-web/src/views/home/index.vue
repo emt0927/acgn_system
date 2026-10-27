@@ -7,7 +7,8 @@
                 <div class="sort_item pl-5 flex shrink-0 gap-4">
                     <div class="search">
                         <n-input-group>
-                            <n-input :style="{ width: '120px' }" v-model:value="searchValue" :allow-input="noSideSpace" />
+                            <n-input :style="{ width: '120px' }" v-model:value="searchValue"
+                                :allow-input="noSideSpace" />
                             <n-button type="primary" @click="Search">
                                 搜索
                             </n-button>
@@ -30,7 +31,7 @@
                     </template>
                 </div>
 
-                <div class="edit"> <n-button type="tertiary" @click="showDrawer">
+                <div class="edit"> <n-button type="tertiary" @click="drawerRef?.open()">
                         点击录入
                     </n-button></div>
             </div>
@@ -49,14 +50,13 @@
                     :item-count="total" />
             </div>
             <!-- 抽屉组件 -->
-            <MyDrawer v-model:active="drawerState" :detail="drawerDetail" @setDetail="setDetail"
-                @getBangumiList="getBangumiList" :importDetail="importDetail">
+            <MyDrawer ref="drawerRef" @success="() => { showDetail = false; getMediaList(); }">
             </MyDrawer>
             <!-- 详情展示框 -->
             <MyModal v-model:show="showDetail" :item="selectedItem" @open-edit="handleOpenEditFromDetail"
                 @del-show="DelItem" @open-seriesCard="openSeriesCard" />
             <SeriesCard v-model:show="active" :data="seriesBox"></SeriesCard>
-            <BangumuList v-model:show="bangumiListState" :type="bangumitype" @getBgmMedia="getBgmMedia"></BangumuList>
+
         </div>
     </MyCard>
 </template>
@@ -67,43 +67,13 @@ import { computed, h, ref } from 'vue';
 import ContentCard from './components/ContentCard.vue';
 import MyDrawer from './components/MyDrawer.vue';
 import MyModal from './components/MyModal.vue';
-import type { importDetailType, MediaCardDetail, MediaCardItem } from '@/types/acgn.ts';
-import { addMediaApi, deleteMediaApi, getMediaDetailApi, getMediaListApi, putUpdateMediaApi } from '@/api/media.ts';
+import type { MediaCardDetail, MediaCardItem } from '@/types/acgn.ts';
+import { deleteMediaApi, getMediaDetailApi, getMediaListApi } from '@/api/media.ts';
 const userStore = useUserStore()
 // 默认选中状态
 const currentStatus = computed(() => userStore.typeObj.status)
 // 默认选中tabs 
 const defaultTbs = computed(() => userStore.typeObj.type)
-// bangumi列表状态
-const bangumiListState = ref(false)
-const bangumitype = ref('')
-const getBangumiList = (type: string) => {
-    bangumitype.value = type
-    bangumiListState.value = true
-}
-
-// 拿到bgm回显的数据
-const rawfile = ref()
-const detail = ref()
-// url转file
-const urlToFile = async (url: string, fileName = 'cover.jpg'): Promise<File> => {
-    const res = await fetch(url)
-    const blob = await res.blob()
-    return new File([blob], fileName, { type: blob.type || 'image/jpeg' })
-}
-const importDetail = ref<importDetailType | null>(null)
-const getBgmMedia = async (id: any) => {
-    // bangumi获取到的详情数据 用于抽屉回显
-    console.log(bangumitype.value, id);
-    const res = await getBangumiDetailApi({ id, type: bangumitype.value })
-    if (res.data.coverUrl) {
-        rawfile.value = await urlToFile(res.data.coverUrl)
-        detail.value = { ...res.data, rawfile: rawfile.value }
-    console.log(detail.value, '111111111');
-        importDetail.value = detail.value
-        bangumiListState.value = false
-    }
-}
 // 分页
 const page = ref(1)
 const pageSize = ref(12)
@@ -141,16 +111,6 @@ const handleOpenDetail = async (id: string) => {
     showDetail.value = true
 }
 
-// 抽屉状态
-const drawerState = ref(false)
-// 作品详情数据
-const drawerDetail = ref<MediaCardDetail | null>(null)
-// 新增作品
-const showDrawer = async () => {
-    drawerDetail.value = null
-    drawerState.value = true
-
-}
 // 打开系列关联盒子
 const active = ref(false)
 const seriesBox = ref<SeriesWithMediaData>()
@@ -163,32 +123,14 @@ const openSeriesCard = async (id: string) => {
 import { useMessage, type DropdownOption } from 'naive-ui'
 import SeriesCard from './components/SeriesCard.vue';
 import { getSeriesAndMediaApi, type SeriesWithMediaData } from '@/api/serires.ts';
-import BangumuList from '@/components/BangumuList.vue';
-import { getBangumiDetailApi } from '@/api/bangumi.ts';
 import { trackRecordApi } from '@/api/record.ts';
 import { useUserStore } from '@/store/index.ts';
 const message = useMessage()
-const setDetail = async (data: any) => {
-    if (data.id) {
-        const res = await putUpdateMediaApi(data)
-        message.success(res.message)
-        showDetail.value = false
-    } else {
-        console.log('我是添加');
-        const res = await addMediaApi(data)
-        message.success(res.message)
-        // 记录
-        await trackRecordApi('midia', data.title, 'add')
-    }
-    drawerState.value = false
-    getMediaList()
-}
-
+const drawerRef = ref<InstanceType<typeof MyDrawer> | null>(null)
 // 详情弹出中的编辑传回来的数据
 const handleOpenEditFromDetail = (detail: MediaCardDetail) => {
     // 抽屉数据
-    drawerDetail.value = detail
-    drawerState.value = true
+    drawerRef.value?.open(detail)
 }
 // 删除作品
 const DelItem = async (id: string, title: string) => {

@@ -1,8 +1,8 @@
 <template>
     <n-drawer v-model:show="visible" :width="502" placement="right">
-        <n-drawer-content :title="detail?.id ? '编辑作品' : '新增作品'" closable>
+        <n-drawer-content :title="oneForm?.id ? '编辑作品' : '新增作品'" closable>
             <n-radio-group v-model:value="acgnType" name="left-size" style="margin-bottom: 16px"
-                @update:value="handleTypeChange" v-if="!detail?.id">
+                @update:value="handleTypeChange" v-if="!oneForm?.id">
                 <n-radio-button value="anime">
                     动漫
                 </n-radio-button>
@@ -19,7 +19,7 @@
             <n-form ref="formRef" :model="oneForm" :style="{ maxWidth: '640px' }" label-placement="left"
                 label-width="auto" :key="acgnType" :rules="rules" require-mark-placement="left">
                 <n-form-item label="快速导入">
-                    <n-button text target="_blank" type="primary" @click="emit('getBangumiList', acgnType)">
+                    <n-button text target="_blank" type="primary" @click="bangumiListState = true">
                         从bangumi导入
                     </n-button>
                 </n-form-item>
@@ -58,25 +58,52 @@
             </n-form>
         </n-drawer-content>
     </n-drawer>
+    <BangumuList v-model:show="bangumiListState" :type="acgnType" @getBgmMedia="getBgmMedia"></BangumuList>
 </template>
 
 <script setup lang="ts">
-import type { AcgnType, importDetailType, MediaCardDetail } from '@/types/acgn';
+import type { AcgnType, MediaCardDetail } from '@/types/acgn';
 import { computed, ref, watch } from 'vue';
 import { FIELD_SCHEMAS, getSeriesOptions, type FieldConfig } from '../Schema';
-import type { FormInst, FormRules, UploadFileInfo } from 'naive-ui';
+import { useMessage, type FormInst, type FormRules, type UploadFileInfo } from 'naive-ui';
 import { uploadCoverUrlApi } from '@/api/upload';
+import { getBangumiDetailApi } from '@/api/bangumi';
+import BangumuList from '@/components/BangumuList.vue';
+import { addMediaApi, putUpdateMediaApi } from '@/api/media';
+import { trackRecordApi } from '@/api/record';
 const formRef = ref<FormInst | null>(null)
-const props = defineProps<{
-    active: boolean,
-    detail: MediaCardDetail | null,
-    importDetail: importDetailType | null
-}>()
-const emit = defineEmits(['update:active', 'addDetail', 'setDetail', 'getBangumiList'])
-const visible = computed({
-    get: () => props.active,
-    set: value => emit('update:active', value)
-})
+
+// bangumi相关
+const bangumiListState = ref(false)
+
+const detail = ref()
+// url转file
+const urlToFile = async (url: string, fileName = 'cover.jpg'): Promise<File> => {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    return new File([blob], fileName, { type: blob.type || 'image/jpeg' })
+}
+const getBgmMedia = async (id: any) => {
+    // bangumi获取到的详情数据 用于抽屉回显
+    console.log(acgnType.value, id);
+    const res = await getBangumiDetailApi({ id, type: acgnType.value })
+    if (res.data.coverUrl) {
+        const file = await urlToFile(res.data.coverUrl)
+        const { totalEpisodes, ...restDetail } = res.data
+        if (totalEpisodes) {
+            oneForm.value.progress.total = totalEpisodes
+        }
+        FileList.value = [{
+            id: 'existing.cover',
+            name: '封面图',
+            status: 'finished',
+            url: res.data.coverUrl
+        }]
+        rawFile.value = file
+        oneForm.value = { ...oneForm.value, ...restDetail }
+        bangumiListState.value = false
+    }
+}
 // 作品的不同状态
 const acgnType = ref<AcgnType>('anime')
 
@@ -167,12 +194,12 @@ const getItemPath = (item: FieldConfig) => {
     }
     return item.key
 }
-watch(() => props.active, (isOpen) => {
-    if (!isOpen) return
-    if (props.detail) {
-        //编辑
-        // 编辑图片
-        const existingUrl = props.detail.coverUrl
+const visible = ref(false)
+const emit = defineEmits(['success', 'setDetail'])
+const open = async (detail?: MediaCardDetail) => {
+    visible.value = true
+    if (detail && detail.id) {
+        const existingUrl = detail.coverUrl
         oneForm.value.coverUrl = existingUrl
         FileList.value = [
             {
@@ -183,23 +210,14 @@ watch(() => props.active, (isOpen) => {
             }
         ]
         rawFile.value = null // 编辑刚打开时，尚未选择“新文件”
-        acgnType.value = props.detail.type || 'anime';
-        const detailProgress = props.detail.progress
-        let safeProgress
-        if (acgnType.value === 'game') {
-            safeProgress = { text: (detailProgress?.text) || '' }
-        } else {
-            safeProgress = {
-                current: (detailProgress?.current) || 0,
-                total: (detailProgress?.total) || 0
-            }
-        }
-        // 重点
-        const rawSeries = props.detail.series
-        const safeSeries = (typeof rawSeries === 'object' && rawSeries !== null)
-            ? rawSeries._id
-            : rawSeries
-        oneForm.value = { ...props.detail, series: safeSeries, progress: safeProgress }
+        acgnType.value = detail.type || 'anime';
+        const detailProgress = detail.progress
+        const safeProgress = acgnType.value === 'game'
+            ? { text: detailProgress?.text || '' }
+            : { current: detailProgress?.current || 0, total: detailProgress?.total || 0 }
+        const rawSeries = detail.series
+        const safeSeries = (typeof rawSeries === 'object' && rawSeries !== null) ? rawSeries._id : rawSeries
+        oneForm.value = { ...detail, series: safeSeries, progress: safeProgress }
     } else {
         oneForm.value = createFrom(acgnType.value)
         oneForm.value.coverUrl = ''
@@ -207,36 +225,17 @@ watch(() => props.active, (isOpen) => {
         rawFile.value = null
         FileList.value = []
     }
-})
-// 快速导入
-watch(() => props.importDetail, (newValue) => {
-    if (newValue) {
-        const { rawfile, totalEpisodes, ...detail } = newValue
-        if (totalEpisodes) {
-            // 总集数
-            oneForm.value.progress.total = totalEpisodes
-        }
-        // 换封面图
-        FileList.value = [
-            {
-                id: 'existing.cover',
-                name: '封面图',
-                status: 'finished',
-                url: newValue.coverUrl
-            }
-        ]
-        // 封面图的file对象
-        rawFile.value = rawfile ?? null
-        oneForm.value = { ...oneForm.value, ...detail }
-    }
-}, { deep: true, immediate: true })
+    seriesOptions.value = await getSeriesOptions(acgnType.value)
+}
+defineExpose({ open })
+
 //动态的系列数据
 const seriesOptions = ref()
 watch(acgnType, async (newType) => {
-    if (newType) {
+    if (newType && visible.value) {
         seriesOptions.value = await getSeriesOptions(newType)
     }
-}, { immediate: true })
+})
 // 新增切换重置内容
 const handleTypeChange = async (newType: AcgnType) => {
     oneForm.value = createFrom(newType)
@@ -245,6 +244,7 @@ const handleTypeChange = async (newType: AcgnType) => {
     oneForm.value.type = acgnType.value
 }
 //验证
+const message = useMessage()
 const handleValidateClick = (e: MouseEvent) => {
     e.preventDefault()
     formRef.value?.validate(async (errors) => {
@@ -257,8 +257,18 @@ const handleValidateClick = (e: MouseEvent) => {
                 const res = await uploadCoverUrlApi(formData)
                 oneForm.value.coverUrl = res.data?.url
             }
-            emit('setDetail', oneForm.value)
+            if (oneForm.value.id) {
+                const res = await putUpdateMediaApi(oneForm.value)
+                message.success(res.message)
+
+            } else {
+                const res = await addMediaApi(oneForm.value)
+                message.success(res.message)
+                await trackRecordApi('midia', oneForm.value.title, 'add')
+            }
             result()
+            visible.value = false // 自己关掉抽屉
+            emit('success')       // 喊父组件刷新列表
         } else {
             console.log('验证失败', errors);
         }
