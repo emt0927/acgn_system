@@ -175,7 +175,7 @@ export interface Series {
 */
 export interface SeriesDetail {
     /** 系列id*/
-    id: number
+    id: string 
     /** 系列类型 */
     type: AcgnType
     /** 系列标题 */

@@ -3,7 +3,7 @@
         :segmented="{ content: true, footer: true }" :content-style="{ padding: 0 }">
         <template #header>
             <n-ellipsis style="max-width: 150px">
-              {{ detail?.title }}
+                {{ detail?.title }}
             </n-ellipsis>
         </template>
         <template #header-extra>
@@ -45,31 +45,71 @@
 
 <script setup lang="ts">
 import type { SeriesDetail } from '@/types/acgn';
-import { computed } from 'vue';
+import { computed, h, ref } from 'vue';
 import { SERIES_SCHEMAS } from '../Schema';
-
-const props = defineProps<{
-    detail: SeriesDetail | null
-    show: boolean
-
-}>()
-const emit = defineEmits(['update:show', 'open-edit', 'del-show', 'open-SeriesItem'])
+import { deleteSeriesApi, getSeriesAndMediaApi, getSeriesDetailApi } from '@/api/serires';
+import { useDialog, useMessage } from 'naive-ui';
+import { trackRecordApi } from '@/api/record';
+const detail = ref<SeriesDetail | null>(null)
 // modal开关
-const visible = computed({
-    get: () => props.show,
-    set: (val) => emit('update:show', val)
-})
+const visible = ref(false)
+const open = async (id: string) => {
+    try {
+        const res = await getSeriesDetailApi(id)
+        detail.value = res.data ?? null
+        console.log(detail.value, 'detail');
+    } catch (error) {
+
+    }
+    visible.value = true
+}
+const emit = defineEmits(['open-edit', 'open-SeriesItem', 'del-success'])
+
+defineExpose({ open })
 // 向系列里添加作品
 const setSeriesItem = () => {
-    emit('open-SeriesItem', props.detail?.id, props.detail?.type, props.detail?.title)
+    emit('open-SeriesItem', detail.value?.id, detail.value?.type, detail.value?.title)
 }
 // 编辑回显
 const handleEdit = () => {
-    emit('open-edit', props.detail)
+    visible.value = false
+    emit('open-edit', detail.value)
 }
 // 删除回显
-const handleDel = () => {
-    emit('del-show', props.detail?.id, props.detail?.title)
+const dialog = useDialog()
+const message = useMessage()
+const handleDel = async () => {
+    if (!detail.value) return
+    const { id, title } = detail.value
+    const executeDelete = async () => {
+        const del = await deleteSeriesApi(id)
+        message.success(del.message)
+        await trackRecordApi('series', title, 'clear') // 无论哪个分支，删完都能稳稳记上日志！
+        visible.value = false // 自己把详情弹窗关掉
+        emit('del-success') 
+    }
+    const res = await getSeriesAndMediaApi(id)
+    const list = res.data?.mediaList ?? []
+    if (list.length > 0) {
+        dialog.warning({
+            title: '警告',
+            content: () => {
+                const mediaNames = list.map((item: any) => typeof item === 'string' ? item : (item.title || item.name)).join('、')
+                return h('div', null, [h('p', { style: 'margin-bottom: 8px;' }, '该系列存在关联作品，强行删除后以下作品将失去所属系列：'),
+                h('div', {
+                    style: 'color: #d03050; font-weight: bold; background: rgba(208, 48, 80, 0.08); padding: 8px 12px; border-radius: 4px; word-break: break-all;'
+                }, mediaNames || '无关联作品信息')])
+            },
+            positiveText: '确定',
+            negativeText: '不确定',
+            draggable: true,
+            onPositiveClick: async () => {
+                await executeDelete()
+            },
+        })
+    } else {
+        await executeDelete()
+    }
 }
 // 校验
 const hasValue = (val: any) => {
@@ -77,7 +117,8 @@ const hasValue = (val: any) => {
     return true
 }
 const activeSchema = computed(() => {
-    const item = props.detail as SeriesDetail
+    const item = detail.value as SeriesDetail
+    if (!item) return []
     return SERIES_SCHEMAS.filter(Field => hasValue(item[Field.key]))
 })
 </script>

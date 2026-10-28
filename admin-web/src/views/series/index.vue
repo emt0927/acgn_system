@@ -34,7 +34,7 @@
         <div class="flex flex-col justify-between w-full pt-5">
             <div v-if="(seriesList?.length as number) > 0"
                 class="flex-1 content-start grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
-                <Content v-for="item in seriesList" :key="item.id" :item=item @click="openDetail"></Content>
+                <Content v-for="item in seriesList" :key="item.id" :item=item @click="modalRef?.open(item.id as string)"></Content>
             </div>
             <div class="flex-1 flex items-center justify-center" v-else>
                 <n-empty description="暂无数据">
@@ -44,10 +44,10 @@
                     :item-count="total" />
             </div>
         </div>
-        <SeriesModal v-model:show="showDetail" :detail="selectedItem" @open-edit="SeriesEdit"
-            @openSeriesItem="getSeriesItem" @del-show="SeriesDel">
+        <SeriesModal  @open-edit="SeriesEdit"
+            @openSeriesItem="getSeriesItem" ref="modalRef" @del-success="getSeriesList">
         </SeriesModal>
-        <SeriesDrawer ref="drawerRef" @success="() => { showDetail = false; getSeriesList() }">
+        <SeriesDrawer ref="drawerRef" @success="getSeriesList">
         </SeriesDrawer>
         <SeriesItemModal v-model:show="SeriesItemShow" :list="SeriesList" @update-Series="updateSeries"
             :newList="newSeriesList" :title="seriesTitle">
@@ -63,7 +63,7 @@ import type { AcgnType, MediaCardItem, Series, SeriesDetail } from '@/types/acgn
 import SeriesModal from './components/SeriesModal.vue';
 import SeriesDrawer from './components/SeriesDrawer.vue';
 import SeriesItemModal from './components/SeriesItemModal.vue';
-import { deleteSeriesApi, getSeriesAndMediaApi, getSeriesDetailApi, getSeriesListApi } from '@/api/serires.ts';
+import {  getSeriesAndMediaApi, getSeriesListApi } from '@/api/serires.ts';
 const selectLabel = ref('最后添加')
 const selectKey = ref(-1)
 const handleSelect = (key: number, option: any) => {
@@ -94,6 +94,7 @@ const Search = async () => {
     searchValue.value = ''
 }
 
+const modalRef = ref<InstanceType<typeof SeriesModal> | null>(null)
 
 // 当前的系列id
 const SeriesId = ref<string>('')
@@ -155,50 +156,10 @@ const drawerRef = ref<InstanceType<typeof SeriesDrawer> | null>(null)
 const SeriesEdit = (detail: SeriesDetail) => {
     drawerRef.value?.open(detail)
 }
-import { useMessage, useDialog, type DropdownOption } from 'naive-ui'
-const message = useMessage()
-const dialog = useDialog()
-// 删除系列
-const SeriesDel = async (id: string, title: string) => {
-    const res = await getSeriesAndMediaApi(id)
-    let del = null
-    if ((res.data?.mediaList.length as number) > 0) {
-        dialog.warning({
-            title: '警告',
-            content: () => {
-                const list = res.data?.mediaList || []
-                const mediaNames = list.map((item: any) => typeof item === 'string' ? item : (item.title || item.name)).join('、')
-                return h('div', null, [h('p', { style: 'margin-bottom: 8px;' }, '该系列存在关联作品，强行删除后以下作品将失去所属系列：'),
-                h('div', {
-                    style: 'color: #d03050; font-weight: bold; background: rgba(208, 48, 80, 0.08); padding: 8px 12px; border-radius: 4px; word-break: break-all;'
-                }, mediaNames || '无关联作品信息')])
-            },
-            positiveText: '确定',
-            negativeText: '不确定',
-            draggable: true,
-            onPositiveClick: async () => {
-                del = await deleteSeriesApi(id)
-                message.success(del.message)
-                showDetail.value = false
-                await getSeriesList()
-            },
-        })
-    } else {
-        del = await deleteSeriesApi(id)
-        message.success(del.message)
-        showDetail.value = false
-        await getSeriesList()
-    }
-    if (del) {
-        // 记录
-        await trackRecordApi('series', title, 'clear')
-    }
-}
-// 抽屉组件传递回来的系列数据
+import { useMessage, type DropdownOption } from 'naive-ui'
 import { getMediaListApi, updateMediaOrSreiesApi } from '@/api/media.ts';
-import { trackRecordApi } from '@/api/record.ts';
 import { useUserStore } from '@/store/index.ts';
-
+const message = useMessage()
 // 页数
 const page = ref(1)
 const pageSize = ref(12)
@@ -253,16 +214,7 @@ const getSeriesList = async () => {
     console.log('我触发了');
 }
 getSeriesList()
-// 详情开关
-// 传递给详情页的数据
-const selectedItem = ref<SeriesDetail | null>(null)
-const showDetail = ref(false)
-const openDetail = async (id: string) => {
-    const res = await getSeriesDetailApi(id)
-    selectedItem.value = res.data ?? null
-    showDetail.value = true
 
-}
 
 </script>
 
