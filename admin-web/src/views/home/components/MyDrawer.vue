@@ -195,18 +195,16 @@ const getItemPath = (item: FieldConfig) => {
     return item.key
 }
 const visible = ref(false)
-const emit = defineEmits(['success', 'setDetail'])
+const emit = defineEmits(['success'])
 const open = async (detail?: MediaCardDetail) => {
     visible.value = true
     if (detail && detail.id) {
-        const existingUrl = detail.coverUrl
-        oneForm.value.coverUrl = existingUrl
         FileList.value = [
             {
                 id: 'existing.cover',
                 name: '封面图',
                 status: 'finished',
-                url: existingUrl
+                url: detail.coverUrl
             }
         ]
         rawFile.value = null // 编辑刚打开时，尚未选择“新文件”

@@ -1,8 +1,8 @@
 <template>
     <n-drawer v-model:show="active" :width="502">
-        <n-drawer-content :title="detail?.id ? '编辑系列' : '新增系列'">
+        <n-drawer-content :title="oneForm?.id ? '编辑系列' : '新增系列'">
             <n-radio-group v-model:value="acgnType" name="left-size" style="margin-bottom: 16px"
-                @update:value="handleTypeChange" v-if="!detail?.id">
+                @update:value="handleTypeChange" v-if="!oneForm?.id">
                 <n-radio-button value="anime">
                     动漫
                 </n-radio-button>
@@ -19,7 +19,7 @@
             <n-form ref="formRef" :model="oneForm" :style="{ maxWidth: '640px' }" label-placement="left"
                 label-width="auto" :key="acgnType" require-mark-placement="left" :rules="rules">
                 <n-form-item label="快速导入">
-                    <n-button text target="_blank" type="primary" @click="emit('getBangumiList', acgnType)">
+                    <n-button text target="_blank" type="primary" @click="bangumiListState = true">
                         从bangumi导入
                     </n-button>
                 </n-form-item>
@@ -43,24 +43,28 @@
             </n-form>
         </n-drawer-content>
     </n-drawer>
+    <BangumuList v-model:show="bangumiListState" :type="acgnType" @getBgmMedia="getBgmMedia"></BangumuList>
 </template>
 
 <script setup lang="ts">
-import type { AcgnType, importDetailType, SeriesDetail } from '@/types/acgn';
-import { computed, ref, watch } from 'vue';
+import type { AcgnType, SeriesDetail } from '@/types/acgn';
+import { computed, ref } from 'vue';
 import { SERIES_SCHEMAS } from '../Schema';
-import type { FormInst, FormRules, UploadFileInfo } from 'naive-ui';
+import { useMessage, type FormInst, type FormRules, type UploadFileInfo } from 'naive-ui';
 import { uploadCoverUrlApi } from '@/api/upload';
-const props = defineProps<{
-    detail: SeriesDetail | null,
-    importDetail: importDetailType | null
-}>()
-const active = defineModel<boolean>('show', { required: true })
+import { getBangumiDetailApi } from '@/api/bangumi';
+import BangumuList from '@/components/BangumuList.vue';
+import { addSeriesApi, putSeriesDetailApi } from '@/api/serires';
+import { trackRecordApi } from '@/api/record';
+
 // 作品的不同状态
 const acgnType = ref<AcgnType>('anime')
 // 切换类型重置数据
 const handleTypeChange = () => {
     oneForm.value.type = acgnType.value
+    oneForm.value = createFrom()
+    FileList.value = []
+    rawFile.value = null
 }
 // 显示数据
 const dynamicForm = computed(() => {
@@ -82,12 +86,37 @@ const createFrom = () => {
     })
     return form
 }
+// bangumi列表状态
+const bangumiListState = ref(false)
+// url转file
+const urlToFile = async (url: string, fileName = 'cover.jpg'): Promise<File> => {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    return new File([blob], fileName, { type: blob.type || 'image/jpeg' })
+}
 
+// 拿到bgm回显的数据
+const getBgmMedia = async (id: any) => {
+    // bangumi获取到的详情数据 用于抽屉回显
+    const res = await getBangumiDetailApi({ id, type: 'series' })
+    if (res.data.coverUrl) {
+        const file = await urlToFile(res.data.coverUrl)
+        FileList.value = [{
+            id: 'existing.cover',
+            name: '封面图',
+            status: 'finished',
+            url: res.data.coverUrl
+        }]
+        rawFile.value = file
+        oneForm.value = { ...oneForm.value, ...res.data }
+        bangumiListState.value = false
+    }
+}
 // 图片上传
 const FileList = ref<UploadFileInfo[]>([])
 const rawFile = ref<File | null>(null) // 专门在外面存原生文件的响应式变量
 const setCoverUrl = ({ file }: { file: UploadFileInfo }) => {
-    if (file.status !== 'finished' && file.file) {
+    if (file.status !== 'removed' && file.file) {
         rawFile.value = file.file
         oneForm.value.coverUrl = file.name
     } else {
@@ -95,16 +124,21 @@ const setCoverUrl = ({ file }: { file: UploadFileInfo }) => {
         oneForm.value.coverUrl = ''
     }
 }
-watch(active, (isOpen) => {
-    if (!isOpen) return
-    if (props.detail) {
-        oneForm.value = { ...props.detail }
+const active = ref(false)
+const open = async (detail?: SeriesDetail) => {
+    active.value = true
+    if (detail && detail.id) {
+        acgnType.value = detail.type || 'anime'
+        oneForm.value = {
+            ...detail,
+            tags: detail.tags || []
+        }
         // 编辑图片
         FileList.value = [{
             id: 'existing.cover',
             name: '封面图',
             status: 'finished',
-            url: oneForm.value.coverUrl
+            url: detail.coverUrl
         }]
         rawFile.value = null // 编辑刚打开时，尚未选择“新文件”
     } else {
@@ -113,22 +147,8 @@ watch(active, (isOpen) => {
         rawFile.value = null
         FileList.value = []
     }
-
-})
-// 快速导入
-watch(() => props.importDetail, (newValue) => {
-    if (newValue) {
-        const { rawfile, ...detail } = newValue
-        rawFile.value = rawfile || null
-        FileList.value = [{
-            id: 'existing.cover',
-            name: '封面图',
-            status: 'finished',
-            url: newValue.coverUrl
-        }]
-        oneForm.value = { ...oneForm.value, ...detail }
-    }
-}, { deep: true, immediate: true })
+}
+defineExpose({ open })
 // 规则
 const rules = computed<FormRules>(() => {
     const rulesObj: FormRules = {}
@@ -146,7 +166,8 @@ const rules = computed<FormRules>(() => {
 })
 // 表单ref
 const formRef = ref<FormInst | null>(null)
-const emit = defineEmits(['setSeriesData', 'getBangumiList'])
+const emit = defineEmits(['success'])
+const message = useMessage()
 // 提交校验
 const handleValidateClick = (e: MouseEvent) => {
     e.preventDefault() // 阻止默认事件
@@ -158,7 +179,18 @@ const handleValidateClick = (e: MouseEvent) => {
                 const res = await uploadCoverUrlApi(formdata)
                 oneForm.value.coverUrl = res.data?.url
             }
-            emit('setSeriesData', oneForm.value)
+            if (oneForm.value.id) {
+                const res = await putSeriesDetailApi(oneForm.value)
+                message.success(res.message)
+            } else {
+                const res = await addSeriesApi(oneForm.value)
+                message.success(res.message)
+                // 记录
+                await trackRecordApi('series', oneForm.value.title, 'add')
+            }
+            result()
+            active.value = false
+            emit('success')       // 喊父组件刷新列表
         } else {
             console.log('校验失败', errors);
         }

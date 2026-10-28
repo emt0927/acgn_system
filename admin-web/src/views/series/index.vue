@@ -12,7 +12,8 @@
                 <div class="sort_item flex shrink-0 gap-4">
                     <div class="search">
                         <n-input-group>
-                            <n-input :style="{ width: '120px' }" v-model:value="searchValue" :allow-input="noSideSpace" />
+                            <n-input :style="{ width: '120px' }" v-model:value="searchValue"
+                                :allow-input="noSideSpace" />
                             <n-button type="primary" @click="Search">
                                 搜索
                             </n-button>
@@ -24,7 +25,7 @@
                     </n-dropdown>
                 </div>
                 <div class="flex flex-1 justify-end  ml-4">
-                    <n-button type="tertiary" @click="setSeries">
+                    <n-button type="tertiary" @click="drawerRef?.open()">
                         添加系列
                     </n-button>
                 </div>
@@ -46,13 +47,11 @@
         <SeriesModal v-model:show="showDetail" :detail="selectedItem" @open-edit="SeriesEdit"
             @openSeriesItem="getSeriesItem" @del-show="SeriesDel">
         </SeriesModal>
-        <SeriesDrawer v-model:show="active" :detail="seriesItem" @setSeriesData="setSeriesData"
-            @getBangumiList="getBangumiList" :importDetail="importDetail">
+        <SeriesDrawer ref="drawerRef" @success="() => { showDetail = false; getSeriesList() }">
         </SeriesDrawer>
         <SeriesItemModal v-model:show="SeriesItemShow" :list="SeriesList" @update-Series="updateSeries"
             :newList="newSeriesList" :title="seriesTitle">
         </SeriesItemModal>
-        <BangumuList v-model:show="bangumiListState" :type="bangumitype" @getBgmMedia="getBgmMedia"></BangumuList>
     </MyCard>
 </template>
 
@@ -60,11 +59,11 @@
 import MyCard from '@/components/MyCard.vue';
 import { computed, h, ref } from 'vue';
 import Content from './components/Content.vue';
-import type { AcgnType, importDetailType, MediaCardItem, Series, SeriesDetail } from '@/types/acgn.ts';
+import type { AcgnType, MediaCardItem, Series, SeriesDetail } from '@/types/acgn.ts';
 import SeriesModal from './components/SeriesModal.vue';
 import SeriesDrawer from './components/SeriesDrawer.vue';
 import SeriesItemModal from './components/SeriesItemModal.vue';
-import { addSeriesApi, deleteSeriesApi, getSeriesAndMediaApi, getSeriesDetailApi, getSeriesListApi, putSeriesDetailApi } from '@/api/serires.ts';
+import { deleteSeriesApi, getSeriesAndMediaApi, getSeriesDetailApi, getSeriesListApi } from '@/api/serires.ts';
 const selectLabel = ref('最后添加')
 const selectKey = ref(-1)
 const handleSelect = (key: number, option: any) => {
@@ -94,34 +93,8 @@ const Search = async () => {
     await getSeriesList()
     searchValue.value = ''
 }
-// bangumi列表状态
-const bangumiListState = ref(false)
-const bangumitype = ref('')
-const getBangumiList = (type: string) => {
-    console.log(type);
-    bangumitype.value = type
-    bangumiListState.value = true
-}
-// 拿到bgm回显的数据
-const rawfile = ref()
-const detail = ref()
-// url转file
-const urlToFile = async (url: string, fileName = 'cover.jpg'): Promise<File> => {
-    const res = await fetch(url)
-    const blob = await res.blob()
-    return new File([blob], fileName, { type: blob.type || 'image/jpeg' })
-}
-const importDetail = ref<importDetailType | null>(null)
-const getBgmMedia = async (id: any) => {
-    // bangumi获取到的详情数据 用于抽屉回显
-    const res = await getBangumiDetailApi({ id, type: 'series' })
-    if (res.data.coverUrl) {
-        rawfile.value = await urlToFile(res.data.coverUrl)
-        detail.value = { ...res.data, rawfile: rawfile.value }
-        importDetail.value = detail.value
-        bangumiListState.value = false
-    }
-}
+
+
 // 当前的系列id
 const SeriesId = ref<string>('')
 // 获取向系列添加作品需要的数据
@@ -177,19 +150,10 @@ const SeriesorMediaData = async () => {
     const res = await getSeriesAndMediaApi(SeriesId.value)
     newSeriesList.value = res.data?.mediaList ?? []
 }
-// 抽屉开关
-const active = ref(false)
-//传递给抽屉组件的系列相关数据
-const seriesItem = ref<SeriesDetail | null>(null)
-// 新增系列
-const setSeries = () => {
-    seriesItem.value = null
-    active.value = true
-}
+const drawerRef = ref<InstanceType<typeof SeriesDrawer> | null>(null)
 // 编辑系列
 const SeriesEdit = (detail: SeriesDetail) => {
-    seriesItem.value = detail
-    active.value = true
+    drawerRef.value?.open(detail)
 }
 import { useMessage, useDialog, type DropdownOption } from 'naive-ui'
 const message = useMessage()
@@ -232,26 +196,9 @@ const SeriesDel = async (id: string, title: string) => {
 }
 // 抽屉组件传递回来的系列数据
 import { getMediaListApi, updateMediaOrSreiesApi } from '@/api/media.ts';
-import BangumuList from '@/components/BangumuList.vue';
-import { getBangumiDetailApi } from '@/api/bangumi.ts';
 import { trackRecordApi } from '@/api/record.ts';
 import { useUserStore } from '@/store/index.ts';
-const setSeriesData = async (data: any) => {
-    if (data.id) {
-        const res = await putSeriesDetailApi(data)
-        message.success(res.message)
-    } else {
-        const res = await addSeriesApi(data)
-        message.success(res.message)
-        // 记录
-        await trackRecordApi('series', data.title, 'add')
 
-    }
-    active.value = false
-    showDetail.value = false
-    // 刷新数据
-    getSeriesList()
-}
 // 页数
 const page = ref(1)
 const pageSize = ref(12)
