@@ -63,12 +63,14 @@ const open = async (id: string) => {
     }
     visible.value = true
 }
-const emit = defineEmits(['open-edit', 'open-SeriesItem', 'del-success'])
+const emit = defineEmits(['open-edit', 'open-series-item', 'del-success'])
 
 defineExpose({ open })
 // 向系列里添加作品
 const setSeriesItem = () => {
-    emit('open-SeriesItem', detail.value?.id, detail.value?.type, detail.value?.title)
+    if (!detail.value) return
+    const { id, type, title } = detail.value
+    emit('open-series-item', { id, type, title })
 }
 // 编辑回显
 const handleEdit = () => {
@@ -86,7 +88,7 @@ const handleDel = async () => {
         message.success(del.message)
         await trackRecordApi('series', title, 'clear') // 无论哪个分支，删完都能稳稳记上日志！
         visible.value = false // 自己把详情弹窗关掉
-        emit('del-success') 
+        emit('del-success')
     }
     const res = await getSeriesAndMediaApi(id)
     const list = res.data?.mediaList ?? []

@@ -34,7 +34,9 @@
         <div class="flex flex-col justify-between w-full pt-5">
             <div v-if="(seriesList?.length as number) > 0"
                 class="flex-1 content-start grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
-                <Content v-for="item in seriesList" :key="item.id" :item=item @click="modalRef?.open(item.id as string)"></Content>
+                <Content v-for="item in seriesList" :key="item.id" :item=item
+                    @click="modalRef?.open(item.id as string)">
+                </Content>
             </div>
             <div class="flex-1 flex items-center justify-center" v-else>
                 <n-empty description="暂无数据">
@@ -44,26 +46,30 @@
                     :item-count="total" />
             </div>
         </div>
-        <SeriesModal  @open-edit="SeriesEdit"
-            @openSeriesItem="getSeriesItem" ref="modalRef" @del-success="getSeriesList">
-        </SeriesModal>
+        <SeriesModel @open-edit="(detail) => drawerRef?.open(detail)"
+            @open-series-item="(data) => itemModelRef?.open(data)" ref="modalRef" @del-success="getSeriesList">
+        </SeriesModel>
         <SeriesDrawer ref="drawerRef" @success="getSeriesList">
         </SeriesDrawer>
-        <SeriesItemModal v-model:show="SeriesItemShow" :list="SeriesList" @update-Series="updateSeries"
-            :newList="newSeriesList" :title="seriesTitle">
-        </SeriesItemModal>
+        <SeriesItemModel ref="itemModelRef">
+        </SeriesItemModel>
     </MyCard>
 </template>
 
 <script setup lang="ts">
-import MyCard from '@/components/MyCard.vue';
 import { computed, h, ref } from 'vue';
 import Content from './components/Content.vue';
-import type { AcgnType, MediaCardItem, Series, SeriesDetail } from '@/types/acgn.ts';
-import SeriesModal from './components/SeriesModal.vue';
+import MyCard from '@/components/MyCard.vue';
+import SeriesModel from './components/SeriesModel.vue';
 import SeriesDrawer from './components/SeriesDrawer.vue';
-import SeriesItemModal from './components/SeriesItemModal.vue';
-import {  getSeriesAndMediaApi, getSeriesListApi } from '@/api/serires.ts';
+import SeriesItemModel from './components/SeriesItemModel.vue';
+import type { Series } from '@/types/acgn.ts';
+import { getSeriesListApi } from '@/api/serires.ts';
+import { useUserStore } from '@/store/index.ts';
+import { type DropdownOption } from 'naive-ui'
+const drawerRef = ref<InstanceType<typeof SeriesDrawer> | null>(null)
+const modalRef = ref<InstanceType<typeof SeriesModel> | null>(null)
+const itemModelRef = ref<InstanceType<typeof SeriesItemModel> | null>(null)
 const selectLabel = ref('最后添加')
 const selectKey = ref(-1)
 const handleSelect = (key: number, option: any) => {
@@ -93,73 +99,6 @@ const Search = async () => {
     await getSeriesList()
     searchValue.value = ''
 }
-
-const modalRef = ref<InstanceType<typeof SeriesModal> | null>(null)
-
-// 当前的系列id
-const SeriesId = ref<string>('')
-// 获取向系列添加作品需要的数据
-const SeriesItemShow = ref(false)
-// 初始作品数据
-const mediaList = ref<MediaCardItem[] | null>(null)
-const MediaData = async () => {
-    const res = await getMediaListApi()
-    mediaList.value = res.data?.list ?? []
-}
-MediaData()
-const Type = ref<AcgnType | null>(null)
-// 该系列相关联的数据
-const newSeriesList = ref<MediaCardItem[] | null>(null)
-const seriesTitle = ref('')
-const getSeriesItem = async (id: string, type: AcgnType, title: string) => {
-    Type.value = type
-    SeriesId.value = id
-    seriesTitle.value = title
-    // 系列相关联的作品
-    const res = await getSeriesAndMediaApi(id)
-    newSeriesList.value = res.data?.mediaList ?? []
-    SeriesItemShow.value = true
-}
-// 清洗后的作品数据
-const SeriesList = computed<MediaCardItem[]>(() => {
-    if (!Type.value) return []
-    return mediaList.value?.filter(item => {
-        // 过滤出同类型并且没有系列或者是其他系列的作品
-        const isSameType = item.type === Type.value
-        const isCurrentOrNoSeries = item.seriesId === '' || item.seriesId !== SeriesId.value
-        return isSameType && isCurrentOrNoSeries
-    }) ?? []
-})
-// 快速修改作品的类型
-const updateSeries = async (id: string, show: string) => {
-
-    if (show === 'add') {
-        // 添加类型
-        await updateMediaOrSreiesApi(id, SeriesId!.value)
-    } else {
-        // 取消类型
-        console.log(id);
-        await updateMediaOrSreiesApi(id, '')
-    }
-
-    await Promise.allSettled([MediaData(), SeriesorMediaData()])
-    message.success('修改成功')
-
-}
-// 系列关联的作品 
-const SeriesorMediaData = async () => {
-    const res = await getSeriesAndMediaApi(SeriesId.value)
-    newSeriesList.value = res.data?.mediaList ?? []
-}
-const drawerRef = ref<InstanceType<typeof SeriesDrawer> | null>(null)
-// 编辑系列
-const SeriesEdit = (detail: SeriesDetail) => {
-    drawerRef.value?.open(detail)
-}
-import { useMessage, type DropdownOption } from 'naive-ui'
-import { getMediaListApi, updateMediaOrSreiesApi } from '@/api/media.ts';
-import { useUserStore } from '@/store/index.ts';
-const message = useMessage()
 // 页数
 const page = ref(1)
 const pageSize = ref(12)
@@ -214,8 +153,6 @@ const getSeriesList = async () => {
     console.log('我触发了');
 }
 getSeriesList()
-
-
 </script>
 
 <style scoped>
