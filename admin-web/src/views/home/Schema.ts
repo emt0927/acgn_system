@@ -1,4 +1,3 @@
-import { getSeriesListApi } from "@/api/serires";
 import { SUB_TYPE_OPTIONS_MAP, type AcgnType, type MediaCardDetail } from "@/types/acgn"
 
 // 四种渲染状态
@@ -43,6 +42,7 @@ export interface FieldConfig {
     type?: RenderType, // 详情展示用
     formType?: FormType, // 表单输入控件类型
     editable?: boolean,
+    rulePath?: 'progress.text' | 'progress.current'
     options?: { label: string; value: any }[],
     required?: boolean // 是否为必填项
 }
@@ -62,6 +62,7 @@ const getCommonFooter = (type: AcgnType): FieldConfig[] => {
             key: 'progress',
             type: 'progress',
             formType: isGame ? 'progress-text' : 'progress-pair',
+            rulePath: isGame ? 'progress.text' : 'progress.current',
             required: true
         },
         {
@@ -81,15 +82,7 @@ const getCommonFooter = (type: AcgnType): FieldConfig[] => {
     ]
 }
 
-// 系列函数
-export const getSeriesOptions = async (type: AcgnType) => {
-    const data = await getSeriesListApi()
-    const list = data.data?.list || []
-    return list.filter(item => item.type === type).map(item => ({
-        label: item.title,
-        value: item.id
-    }))
-}
+
 
 // 划分具体差异
 export const FIELD_SCHEMAS: Record<AcgnType, FieldConfig[]> = {
@@ -129,4 +122,22 @@ export const FIELD_SCHEMAS: Record<AcgnType, FieldConfig[]> = {
 // 原作 作者 / 原作 (漫画/小说主要字段，动画原作者)
 // 导演 动漫独有
 // 制作公司 游戏独有
+export const createMediaForm = (type: AcgnType, detail?: MediaCardDetail) => {
+    const schema = FIELD_SCHEMAS[type] || []
+    const form: Record<string, any> = { type, coverUrl: '' }
+    schema.forEach(item => {
+        form[item.key] = null
+    })
+    form.progress = type === 'game' ? { text: '' } : { current: 0, total: 0 }
+    if (detail && detail.id) {
+        const detailProgress = detail.progress
+        const safeProgress = type === 'game'
+            ? { text: detailProgress?.text || '' }
+            : { current: detailProgress?.current || 0, total: detailProgress?.total || 0 }
+        const rawSeries = detail.series
+        const safeSeries = (typeof rawSeries === 'object' && rawSeries !== null) ? rawSeries._id : rawSeries
+        return { ...detail, series: safeSeries, progress: safeProgress}
+    }
+    return form
+}
 

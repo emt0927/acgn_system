@@ -56,7 +56,6 @@
             <MyModal v-model:show="showDetail" :item="selectedItem" @open-edit="handleOpenEditFromDetail"
                 @del-show="DelItem" @open-seriesCard="openSeriesCard" />
             <SeriesCard v-model:show="active" :data="seriesBox"></SeriesCard>
-
         </div>
     </MyCard>
 </template>
