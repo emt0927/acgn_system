@@ -49,35 +49,47 @@
 <script setup lang="ts">
 
 
-const emit = defineEmits(['update:show', 'open-edit', 'del-show', 'open-seriesCard'])
+const emit = defineEmits(['open-edit', 'open-seriesCard', 'del-success'])
 import type { AcgnStatus, MediaCardDetail } from '@/types/acgn';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { FIELD_SCHEMAS } from '../Schema';
-const props = defineProps<{
-    show: boolean,
-    item: MediaCardDetail | null
-}>()
-const visible = computed({
-    get: () => props.show,
-    set: (val) => emit('update:show', val)
-})
+import { deleteMediaApi, getMediaDetailApi } from '@/api/media';
+import { trackRecordApi } from '@/api/record';
+import { useMessage } from 'naive-ui';
+
+const visible = ref(false)
+const item = ref<MediaCardDetail | null>(null)
+const open = async (id: string) => {
+    if (!id) return
+    visible.value = true
+    const res = await getMediaDetailApi(id)
+    item.value = res.data ?? {}
+}
+defineExpose({ open })
 // 点击系列的回显
 const getSeriesClick = () => {
-    emit('open-seriesCard', props.item?.series?._id)
+    emit('open-seriesCard', item.value?.series?._id)
 
 }
 // 编辑回显
 const handleEdit = () => {
-    emit('open-edit', props.item)
+    emit('open-edit', item.value)
 }
 // 删除回显
-const handleDel = () => {
-    emit('del-show', props.item?.id, props.item?.title)
+const message = useMessage()
+const handleDel = async () => {
+    if (!item.value) return
+    const { id, title } = item.value
+    const res = await deleteMediaApi(id)
+    message.success(res.message)
+    await trackRecordApi('media', title, 'clear')
+    visible.value = false
+    emit('del-success')
 }
 
 // 进度展示
 const progressText = computed(() => {
-    const { progress } = props.item as MediaCardDetail
+    const { progress } = item.value as MediaCardDetail
     if (!progress) return '暂无进度'
     if (progress.text) return progress.text
     return `${progress.current || '--'}/${progress.total || '--'}话`
@@ -89,15 +101,15 @@ const hasValue = (val: any) => {
 }
 const activeSchema = computed(() => {
     // 类型收紧
-    const item = props.item
-    if (!item) return []
-    const rawSchema = FIELD_SCHEMAS[item.type] || []
-    return rawSchema.filter(field => hasValue(item[field.key]))
+    const newItem = item.value
+    if (!newItem) return []
+    const rawSchema = FIELD_SCHEMAS[newItem.type] || []
+    return rawSchema.filter(field => hasValue(newItem[field.key]))
 })
 
 // 状态文字
 const getAcgnStatusText = computed(() => {
-    const { type, status } = props.item as MediaCardDetail
+    const { type, status } = item.value as MediaCardDetail
     const isGame = type === 'game'
     const stateMap: Record<AcgnStatus, { game: string, default: string }> = {
         'wish': { game: '准备玩', default: '准备追' },

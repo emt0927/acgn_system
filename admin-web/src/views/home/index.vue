@@ -39,7 +39,7 @@
         <div class="flex flex-col justify-between w-full pt-5 ">
             <div v-if="(mediaList?.length as number) > 0"
                 class="flex-1 content-start grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4 px-5 py-0  min-h-0 overflow-y-auto">
-                <ContentCard v-for="item in mediaList" :key="item.id" :item="item" @click="handleOpenDetail">
+                <ContentCard v-for="item in mediaList" :key="item.id" :item="item" @click="MyModalRef?.open(item.id)">
                 </ContentCard>
             </div>
             <div v-else class="flex-1 flex justify-center items-center">
@@ -50,24 +50,30 @@
                     :item-count="total" />
             </div>
             <!-- 抽屉组件 -->
-            <MyDrawer ref="drawerRef" @success="() => { showDetail = false; getMediaList(); }">
+            <MyDrawer ref="drawerRef" @success="getMediaList">
             </MyDrawer>
             <!-- 详情展示框 -->
-            <MyModal v-model:show="showDetail" :item="selectedItem" @open-edit="handleOpenEditFromDetail"
-                @del-show="DelItem" @open-seriesCard="openSeriesCard" />
-            <SeriesCard v-model:show="active" :data="seriesBox"></SeriesCard>
+            <MyModal @open-edit="(detail) => drawerRef?.open(detail)" @del-success="getMediaList"
+                @open-seriesCard="(id) => seriesCardRef?.open(id)" ref="MyModalRef" />
+            <SeriesCard ref="seriesCardRef"></SeriesCard>
         </div>
     </MyCard>
 </template>
 
 <script setup lang="ts">
-import MyCard from '@/components/MyCard.vue';
 import { computed, h, ref } from 'vue';
+import type { MediaCardItem } from '@/types/acgn.ts';
+import MyCard from '@/components/MyCard.vue';
 import ContentCard from './components/ContentCard.vue';
 import MyDrawer from './components/MyDrawer.vue';
 import MyModal from './components/MyModal.vue';
-import type { MediaCardDetail, MediaCardItem } from '@/types/acgn.ts';
-import { deleteMediaApi, getMediaDetailApi, getMediaListApi } from '@/api/media.ts';
+import SeriesCard from './components/SeriesCard.vue';
+import {  type DropdownOption } from 'naive-ui'
+import { useUserStore } from '@/store/index.ts';
+import {  getMediaListApi } from '@/api/media.ts';
+const seriesCardRef = ref<InstanceType<typeof SeriesCard> | null>(null)
+const MyModalRef = ref<InstanceType<typeof MyModal> | null>(null)
+const drawerRef = ref<InstanceType<typeof MyDrawer> | null>(null)
 const userStore = useUserStore()
 // 默认选中状态
 const currentStatus = computed(() => userStore.typeObj.status)
@@ -99,49 +105,6 @@ const Search = async () => {
     searchValue.value = ''
 }
 getMediaList()
-// 拿到详情数据
-// 传递给详情页的数据
-const selectedItem = ref<MediaCardDetail | null>(null)
-// 作品详情的开关 
-const showDetail = ref(false)
-const handleOpenDetail = async (id: string) => {
-    const res = await getMediaDetailApi(id)
-    selectedItem.value = res.data
-    showDetail.value = true
-}
-
-// 打开系列关联盒子
-const active = ref(false)
-const seriesBox = ref<SeriesWithMediaData>()
-const openSeriesCard = async (id: string) => {
-    const res = await getSeriesAndMediaApi(id)
-    seriesBox.value = res.data
-    active.value = true
-}
-// 添加or编辑作品
-import { useMessage, type DropdownOption } from 'naive-ui'
-import SeriesCard from './components/SeriesCard.vue';
-import { getSeriesAndMediaApi, type SeriesWithMediaData } from '@/api/serires.ts';
-import { trackRecordApi } from '@/api/record.ts';
-import { useUserStore } from '@/store/index.ts';
-const message = useMessage()
-const drawerRef = ref<InstanceType<typeof MyDrawer> | null>(null)
-// 详情弹出中的编辑传回来的数据
-const handleOpenEditFromDetail = (detail: MediaCardDetail) => {
-    // 抽屉数据
-    drawerRef.value?.open(detail)
-}
-// 删除作品
-const DelItem = async (id: string, title: string) => {
-    const res = await deleteMediaApi(id)
-    message.success(res.message)
-    showDetail.value = false
-    await getMediaList()
-    // 记录
-    if (res) {
-        await trackRecordApi('midia', title, 'clear')
-    }
-}
 
 // 排序选择
 const options = [
@@ -166,9 +129,6 @@ const handleSelect = async (_key: number, option: any) => {
     // 切换排序方式
     await getMediaList()
 }
-
-
-
 
 const tabs = [
     {

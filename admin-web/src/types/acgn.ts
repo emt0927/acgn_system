@@ -105,7 +105,7 @@ export interface SeriesInfo {
 }
 export interface MediaCardDetail {
     /** 记录唯一ID */
-    id: number
+    id: string
     /** 作品名称 (如: 新蔷薇少女) */
     title: string
 
