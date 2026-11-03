@@ -18,7 +18,7 @@ router.post('/', token, async (req, res) => {
             if (title) updateQuery.$push = { deletedTitles: title }
         }
         const msg = await record.updateOne({ userId, type, date: today }, updateQuery, { upsert: true })
-        if (msg.matchedCount === 0) {
+        if (msg.matchedCount === 0 &&  msg.upsertedCount === 0) {
             return res.json({
                 code: 200,
                 message: '记录失败'
