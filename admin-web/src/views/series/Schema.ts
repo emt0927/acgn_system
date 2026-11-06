@@ -1,4 +1,4 @@
-import type { SeriesDetail } from "@/types/acgn"
+import type { AcgnType, SeriesDetail } from "@/types/acgn"
 // 详情类型展示
 type RenderType = 'url' | 'tags' | 'comment' | 'date'
 /**
@@ -64,3 +64,16 @@ export const SERIES_SCHEMAS: SeriesFieldConfig[] = [
         hideInDetail: true
     },
 ]
+export const createSeriesForm = (type: AcgnType, detail?: SeriesDetail): Record<string, any> => {
+    if (detail && detail.id) {
+        return {
+            ...detail,
+            tags: detail.tags || []
+        }
+    }
+    const form: Record<string, any> = { type, coverUrl: '' }
+    SERIES_SCHEMAS.forEach(item => {
+        form[item.key] = item.key === 'tags' ? [] : null
+    })
+    return form
+}

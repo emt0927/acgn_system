@@ -166,9 +166,7 @@ const handleValidateClick = (e: MouseEvent) => {
     formRef.value?.validate(async (errors) => {
         if (!errors) {
             // 传图片
-            if (!errors) {
                 oneForm.value.coverUrl = await uploadIfNeeded(oneForm.value.coverUrl)
-            }
             if (oneForm.value.id) {
                 const res = await putUpdateMediaApi(oneForm.value)
                 message.success(res.message)

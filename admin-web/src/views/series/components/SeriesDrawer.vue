@@ -25,7 +25,8 @@
                 </n-form-item>
                 <n-form-item v-for="item in dynamicForm" :key="item.key" :label="item.label" :path="item.key">
                     <n-upload v-if="item.type === 'url'" :default-upload='false' :max="1" list-type="image-card"
-                        v-model:file-list="FileList" @change="setCoverUrl">
+                        v-model:file-list="fileList"
+                        @change="handleFileChange($event, (val) => oneForm.coverUrl = val)">
                     </n-upload>
                     <n-dynamic-tags v-model:value="oneForm[item.key]" v-else-if="item.formType === 'tags'" :max="5" />
                     <n-input v-model:value="oneForm[item.key]" v-else-if="item.formType === 'textarea'" type="textarea"
@@ -36,7 +37,7 @@
                     <n-button @click="handleValidateClick" type="primary" style="margin-right: 20px">
                         提交
                     </n-button>
-                    <n-button @click="result">
+                    <n-button @click="reset">
                         重置
                     </n-button>
                 </n-form-item>
@@ -49,22 +50,20 @@
 <script setup lang="ts">
 import type { AcgnType, SeriesDetail } from '@/types/acgn';
 import { computed, ref } from 'vue';
-import { SERIES_SCHEMAS } from '../Schema';
-import { useMessage, type FormInst, type FormRules, type UploadFileInfo } from 'naive-ui';
-import { uploadCoverUrlApi } from '@/api/upload';
+import { createSeriesForm, SERIES_SCHEMAS } from '../Schema';
+import { useMessage, type FormInst, type FormRules } from 'naive-ui';
 import { getBangumiDetailApi } from '@/api/bangumi';
 import BangumuList from '@/components/BangumuList.vue';
 import { addSeriesApi, putSeriesDetailApi } from '@/api/serires';
 import { trackRecordApi } from '@/api/record';
-
+import { useCoverUpload } from '@/composables/useCoverUpload';
+const { setCoverFromRemoteUrl, setPreviewCover, handleFileChange, uploadIfNeeded, fileList } = useCoverUpload()
 // 作品的不同状态
 const acgnType = ref<AcgnType>('anime')
 // 切换类型重置数据
 const handleTypeChange = () => {
-    oneForm.value.type = acgnType.value
-    oneForm.value = createFrom()
-    FileList.value = []
-    rawFile.value = null
+    oneForm.value = createSeriesForm(acgnType.value)
+    setPreviewCover()
 }
 // 显示数据
 const dynamicForm = computed(() => {
@@ -73,80 +72,25 @@ const dynamicForm = computed(() => {
 })
 // 录入值
 const oneForm = ref<Record<string, any>>({});
-// 创建表单结构
-const createFrom = () => {
-    const schema = SERIES_SCHEMAS
-    const form: Record<string, any> = {}
-    schema.forEach(item => {
-        if (item.key === 'tags') {
-            form[item.key] = []
-        } else {
-            form[item.key] = null
-        }
-    })
-    return form
-}
 // bangumi列表状态
 const bangumiListState = ref(false)
-// url转file
-const urlToFile = async (url: string, fileName = 'cover.jpg'): Promise<File> => {
-    const res = await fetch(url)
-    const blob = await res.blob()
-    return new File([blob], fileName, { type: blob.type || 'image/jpeg' })
-}
-
 // 拿到bgm回显的数据
 const getBgmMedia = async (id: any) => {
     // bangumi获取到的详情数据 用于抽屉回显
     const res = await getBangumiDetailApi({ id, type: 'series' })
     if (res.data.coverUrl) {
-        const file = await urlToFile(res.data.coverUrl)
-        FileList.value = [{
-            id: 'existing.cover',
-            name: '封面图',
-            status: 'finished',
-            url: res.data.coverUrl
-        }]
-        rawFile.value = file
-        oneForm.value = { ...oneForm.value, ...res.data }
-        bangumiListState.value = false
+        await setCoverFromRemoteUrl(res.data.coverUrl)
     }
-}
-// 图片上传
-const FileList = ref<UploadFileInfo[]>([])
-const rawFile = ref<File | null>(null) // 专门在外面存原生文件的响应式变量
-const setCoverUrl = ({ file }: { file: UploadFileInfo }) => {
-    if (file.status !== 'removed' && file.file) {
-        rawFile.value = file.file
-        oneForm.value.coverUrl = file.name
-    } else {
-        rawFile.value = null
-        oneForm.value.coverUrl = ''
-    }
+    oneForm.value = { ...oneForm.value, ...res.data }
+    bangumiListState.value = false
 }
 const active = ref(false)
 const open = async (detail?: SeriesDetail) => {
     active.value = true
-    if (detail && detail.id) {
-        acgnType.value = detail.type || 'anime'
-        oneForm.value = {
-            ...detail,
-            tags: detail.tags || []
-        }
-        // 编辑图片
-        FileList.value = [{
-            id: 'existing.cover',
-            name: '封面图',
-            status: 'finished',
-            url: detail.coverUrl
-        }]
-        rawFile.value = null // 编辑刚打开时，尚未选择“新文件”
-    } else {
-        oneForm.value = createFrom()
-        oneForm.value.type = acgnType.value
-        rawFile.value = null
-        FileList.value = []
-    }
+    setPreviewCover(detail?.coverUrl)
+    acgnType.value = detail?.type || 'anime'
+    oneForm.value = createSeriesForm(acgnType.value, detail)
+
 }
 defineExpose({ open })
 // 规则
@@ -173,12 +117,7 @@ const handleValidateClick = (e: MouseEvent) => {
     e.preventDefault() // 阻止默认事件
     formRef.value?.validate(async errors => {
         if (!errors) {
-            if (rawFile.value) {
-                const formdata = new FormData()
-                formdata.append('file', rawFile.value)
-                const res = await uploadCoverUrlApi(formdata)
-                oneForm.value.coverUrl = res.data?.url
-            }
+            oneForm.value.coverUrl = await uploadIfNeeded(oneForm.value.coverUrl)
             if (oneForm.value.id) {
                 const res = await putSeriesDetailApi(oneForm.value)
                 message.success(res.message)
@@ -188,7 +127,7 @@ const handleValidateClick = (e: MouseEvent) => {
                 // 记录
                 await trackRecordApi('series', oneForm.value.title, 'add')
             }
-            result()
+            reset()
             active.value = false
             emit('success')       // 喊父组件刷新列表
         } else {
@@ -198,10 +137,10 @@ const handleValidateClick = (e: MouseEvent) => {
 }
 
 // 重置表单
-const result = () => {
-    oneForm.value = createFrom()
-    FileList.value = []
-    rawFile.value = null
+const reset = () => {
+    acgnType.value = 'anime'
+    oneForm.value = createSeriesForm('anime')
+    setPreviewCover()
     formRef.value?.restoreValidation()
 }
 </script>
